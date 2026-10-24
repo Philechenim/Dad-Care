@@ -1,0 +1,1008 @@
+<title>Dad Care Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Dad's phone + device simulator on the left, Phil's live dashboard on the right; a second view holds the build plan. */
+:root{
+  --bg:#EDF0EF; --surface:#FFFFFF; --surface-2:#F5F7F6; --ink:#15201D; --muted:#5A6763; --line:#D5DCD9;
+  --accent:#2B3FA0; --accent-soft:#E2E6F6; --on-accent:#FFFFFF;
+  --ok:#1D7F52; --ok-soft:#DDF1E6; --warn:#A8670F; --warn-soft:#FBEBD2; --crit:#C2342A; --crit-soft:#FADDDA;
+  --r-sit:#E2EBE4; --r-din:#ECE5D6; --r-kit:#E7E0EE; --r-bed:#DCE4F1; --r-bath:#D9ECEE; --r-ver:#E8ECDF;
+  --r-out:#D9DEDC; --r-paused:#CDD3D1; --wall:#9AA7A3; --furn:#B9C3BF; --room-ink:#3D4946;
+  --skin:#8A5638; --hair:#D9D9D4;
+  /* Dad's phone is a fixed high-contrast device screen in both themes */
+  --p-bg:#FFFFFF; --p-ink:#0A0F0E; --p-muted:#4A5552; --p-ok:#1A7547; --p-talk:#2B3FA0; --p-med:#9C5800; --p-help:#BE281E; --p-walk:#2E3A37; --bezel:#111614;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --shadow:0 1px 2px rgba(20,30,28,.06), 0 8px 24px rgba(20,30,28,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --surface:#161E1B; --surface-2:#1B2421; --ink:#E6EDEA; --muted:#95A39E; --line:#2A3531;
+  --accent:#93A4FF; --accent-soft:#232B52; --on-accent:#0E1412;
+  --ok:#3FC98A; --ok-soft:#173327; --warn:#F0B44C; --warn-soft:#3A2C15; --crit:#FF6E61; --crit-soft:#41201D;
+  --r-sit:#1E2A24; --r-din:#2A261E; --r-kit:#27222D; --r-bed:#1D2432; --r-bath:#1B2A2D; --r-ver:#232A1E;
+  --r-out:#232B28; --r-paused:#2A3330; --wall:#4D5B57; --furn:#3B4743; --room-ink:#C3CEC9;
+  --hair:#BDBDB7; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161E1B; --surface-2:#1B2421; --ink:#E6EDEA; --muted:#95A39E; --line:#2A3531;
+  --accent:#93A4FF; --accent-soft:#232B52; --on-accent:#0E1412;
+  --ok:#3FC98A; --ok-soft:#173327; --warn:#F0B44C; --warn-soft:#3A2C15; --crit:#FF6E61; --crit-soft:#41201D;
+  --r-sit:#1E2A24; --r-din:#2A261E; --r-kit:#27222D; --r-bed:#1D2432; --r-bath:#1B2A2D; --r-ver:#232A1E;
+  --r-out:#232B28; --r-paused:#2A3330; --wall:#4D5B57; --furn:#3B4743; --room-ink:#C3CEC9;
+  --hair:#BDBDB7; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1480px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:var(--on-accent)}
+.brand h1{font-size:24px}
+.brand p{margin:0;color:var(--muted);font-size:13px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:7px 16px;border-radius:999px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+
+/* prototype grid */
+.proto{display:grid;grid-template-columns:380px minmax(0,1fr);gap:24px;align-items:start}
+.left{display:flex;flex-direction:column;gap:16px;align-items:center;min-width:0}
+@media (max-width:1020px){.proto{grid-template-columns:minmax(0,1fr)}}
+.side-label{align-self:stretch;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.side-label h2{font-size:17px}
+.side-label span{font-size:12px;color:var(--muted)}
+
+/* ---------- Dad's phone ---------- */
+.phone{width:min(360px,100%);height:740px;border-radius:46px;background:var(--bezel);padding:12px;box-shadow:var(--shadow),0 30px 60px -20px rgba(0,0,0,.35)}
+.screen{position:relative;height:100%;border-radius:36px;background:var(--p-bg);color:var(--p-ink);overflow:hidden;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.p-status{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:13px;font-weight:700}
+.p-status .r{display:flex;gap:6px;align-items:center}
+.dview{flex:1;display:flex;flex-direction:column;padding:6px 14px 14px;gap:10px;min-height:0}
+.d-greet{padding:4px 6px 2px;display:flex;justify-content:space-between;align-items:flex-end}
+.d-time{font-family:var(--f-display);font-size:46px;font-weight:700;line-height:1}
+.d-hello{font-size:19px;font-weight:700;color:var(--p-muted)}
+.d-share{font-size:12px;color:var(--p-muted);display:flex;align-items:center;gap:5px;padding:0 6px}
+.d-share i{width:8px;height:8px;border-radius:50%;background:var(--p-ok);display:inline-block}
+.d-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;min-height:0}
+.dbtn{--p:0;position:relative;border:0;border-radius:26px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px;overflow:hidden;transition:transform .15s}
+.dbtn.holding{transform:scale(.97)}
+.dbtn .dlabel{font-size:23px;font-weight:700;line-height:1.1;text-align:center}
+.dbtn.ok{background:var(--p-ok)} .dbtn.talk{background:var(--p-talk)} .dbtn.med{background:var(--p-med)} .dbtn.help{background:var(--p-help)}
+.dbtn.dark{background:var(--p-walk)}
+.dbtn.light{background:#EEF1F0;color:var(--p-ink)}
+.ring{position:relative;width:76px;height:76px;display:grid;place-items:center}
+.ring::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(currentColor calc(var(--p)*360deg),color-mix(in srgb,currentColor 22%,transparent) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px))}
+.ring svg{width:38px;height:38px}
+.ring.sm{width:44px;height:44px}.ring.sm svg{width:22px;height:22px}
+.ring.sm::before{-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px))}
+.d-walk{--p:0;border:0;border-radius:20px;background:#EEF1F0;color:var(--p-ink);display:flex;align-items:center;gap:12px;padding:8px 16px;font-size:18px;font-weight:700;height:64px}
+.d-walk.holding{background:#E1E6E4}
+.d-title{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.1;padding:6px 6px 0}
+.d-sub{font-size:18px;color:var(--p-muted);padding:0 6px}
+.faces{flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:10px;min-height:0}
+.face-btn{flex-direction:row;justify-content:flex-start;padding:0 22px;gap:18px}
+.face-btn .dlabel{font-size:28px}
+.face-btn.good{background:var(--p-ok)} .face-btn.soso{background:#5E6A66} .face-btn.bad{background:var(--p-help)}
+.yesno{flex:1;display:grid;grid-template-rows:1fr 1fr;gap:10px}
+.back{height:60px;flex:none;flex-direction:row;font-size:20px;font-weight:700}
+.back .dlabel{font-size:20px}
+.talk-pad{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.talk-big{--p:0;width:210px;height:210px;border-radius:50%;border:0;background:var(--p-talk);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:22px;font-weight:700;transition:transform .2s, box-shadow .2s}
+.talk-big.rec{transform:scale(1.05);box-shadow:0 0 0 14px color-mix(in srgb,var(--p-talk) 22%,transparent)}
+.wave{display:flex;gap:4px;height:34px;align-items:center}
+.wave i{width:5px;border-radius:3px;background:currentColor;height:8px}
+.talk-big.rec .wave i{animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s!important}.wave i:nth-child(3){animation-delay:.25s!important}.wave i:nth-child(4){animation-delay:.4s!important}.wave i:nth-child(5){animation-delay:.15s!important}
+@keyframes wv{50%{height:32px}}
+.reply{width:100%;background:#EEF1F0;border-radius:18px;padding:12px 14px;font-size:17px}
+.reply b{display:block;font-size:13px;color:var(--p-muted)}
+.dose-card{flex:1;background:#F6F1E7;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.dose-time{font-family:var(--f-display);font-size:38px;font-weight:700;line-height:1}
+.pills{display:flex;flex-direction:column;gap:10px}
+.pillrow{display:flex;align-items:center;gap:14px;font-size:18px;font-weight:700;line-height:1.2}
+.pillrow small{display:block;font-weight:400;font-size:14px;color:var(--p-muted)}
+.pill{flex:none;width:48px;height:48px;border-radius:50%;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.18);position:relative;border:1px solid rgba(0,0,0,.12)}
+.pill::after{content:"";position:absolute;left:50%;top:18%;bottom:18%;width:2px;background:rgba(0,0,0,.15);transform:translateX(-50%)}
+.pill.oval{width:58px;height:34px;border-radius:20px;margin-inline:-5px}
+.pill.small{width:36px;height:36px;margin-inline:6px}
+.big-action{height:96px;flex:none;flex-direction:row;gap:16px}
+.big-action .dlabel{font-size:26px}
+.count{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+.count .n{font-family:var(--f-display);font-size:150px;font-weight:700;line-height:1;color:var(--p-help)}
+.helpon{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 8px}
+.helpon .pulse{width:96px;height:96px;border-radius:50%;background:var(--p-help);display:grid;place-items:center;color:#fff;animation:pl 1.6s ease-out infinite}
+.helpon.ok .pulse{background:var(--p-ok);animation:none}
+@keyframes pl{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--p-help) 55%,transparent)}100%{box-shadow:0 0 0 28px transparent}}
+.beat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.beat .orb{width:200px;height:200px;border-radius:50%;background:var(--p-walk);color:#fff;display:grid;place-items:center;font-family:var(--f-display);font-size:42px;font-weight:700;transition:transform .08s}
+.beat .orb.on{transform:scale(1.08);background:#000}
+.caption{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(10,15,14,.9);color:#fff;border-radius:16px;padding:10px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
+.caption.show{opacity:1;transform:none}
+.caption svg{flex:none;margin-top:2px}
+.hint{position:absolute;left:50%;top:44px;transform:translateX(-50%) translateY(-6px);background:var(--p-ink);color:#fff;font-weight:700;border-radius:999px;padding:8px 16px;font-size:15px;opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
+.hint.show{opacity:1;transform:translateX(-50%)}
+.banner{position:absolute;inset:0;background:color-mix(in srgb,var(--p-med) 12%,#fff);display:flex;flex-direction:column}
+
+/* ---------- simulator ---------- */
+.sim{width:100%;background:var(--surface);border:1px dashed var(--wall);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.sim h2{font-size:17px}
+.sim p.lead{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.sim-g{display:flex;flex-direction:column;gap:7px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip.urgent{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,var(--line))}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.clockrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.clockrow .mono{font-size:22px;font-weight:600}
+select{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:5px 8px}
+
+/* ---------- dashboard ---------- */
+.dash{min-width:0;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.card h3{font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dash-top{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
+.daypill{flex:1;min-width:240px;display:flex;align-items:center;gap:16px;border-radius:18px;padding:14px 18px;background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 30%,transparent);transition:background .3s}
+.daypill .dot{flex:none;width:18px;height:18px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 20%,transparent)}
+.daypill.amber{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 35%,transparent)} .daypill.amber .dot{background:var(--warn);box-shadow:0 0 0 6px color-mix(in srgb,var(--warn) 22%,transparent)}
+.daypill.red{background:var(--crit-soft);border-color:color-mix(in srgb,var(--crit) 40%,transparent)} .daypill.red .dot{background:var(--crit);animation:dp 1.2s infinite}
+.daypill.grey{background:var(--surface-2);border-color:var(--line)} .daypill.grey .dot{background:var(--muted);box-shadow:none}
+@keyframes dp{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--crit) 15%,transparent)}}
+.dp-k{font-family:var(--f-display);font-size:22px;font-weight:700;line-height:1.15}
+.dp-s{font-size:13px;color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 16px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:9px}
+.btn.crit{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn.okb{background:var(--ok);border-color:var(--ok);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.home{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:1280px){.home{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.map-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+.status-line{font-family:var(--f-display);font-size:28px;font-weight:700;line-height:1.1}
+.status-line .dur{color:var(--muted);font-weight:500}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,var(--line))} .badge.warn i{background:var(--warn)}
+.badge.crit{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,var(--line))} .badge.crit i{background:var(--crit)}
+.map{width:100%;height:auto;display:block}
+.map .room rect.fl{stroke:var(--wall);stroke-width:3}
+.map .room.active rect.fl{stroke:var(--accent);stroke-width:4}
+.map .rlabel{font:700 13px var(--f-body);fill:var(--room-ink)}
+.map .slabel{font:400 10px var(--f-body);fill:var(--muted)}
+.map .furn{fill:var(--furn)}
+#avatar{transition:transform 1.1s cubic-bezier(.5,0,.2,1),opacity .4s}
+.av-halo{fill:none;stroke-width:3}
+.av-pulse{fill:none;stroke:var(--crit);stroke-width:3;opacity:0}
+.urgent .av-pulse{animation:avp 1.4s ease-out infinite}
+@keyframes avp{0%{r:20;opacity:.8}100%{r:40;opacity:0}}
+.av-tag rect{fill:var(--ink)} .av-tag text{fill:var(--bg);font:700 10px var(--f-body)}
+.sensor{transition:fill .3s}
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .t{font-family:var(--f-mono);font-size:12px;color:var(--muted);min-width:62px;padding-top:2px}
+.li .b{flex:1;min-width:0}
+.li .b small{display:block;color:var(--muted);font-size:12.5px}
+.lvl{flex:none;width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.lvl.urgent{background:var(--crit)} .lvl.attention{background:var(--warn)} .lvl.info{background:var(--ok)}
+.dose{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.dose:first-child{border-top:0}
+.dose .b{flex:1;min-width:0}
+.st{font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px}
+.st.taken{background:var(--ok-soft);color:var(--ok)} .st.due{background:var(--warn-soft);color:var(--warn)} .st.late{background:var(--crit-soft);color:var(--crit)} .st.upcoming{background:var(--surface-2);color:var(--muted)}
+.mini-pills{display:flex;gap:4px}
+.mini-pills span{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.vnote{background:var(--surface-2);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.vnote .play{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.vnote .bars{flex:1;height:18px;background:repeating-linear-gradient(90deg,var(--accent) 0 2px,transparent 2px 5px);-webkit-mask:linear-gradient(transparent 30%,#000 30% 70%,transparent 70%);opacity:.6;border-radius:2px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.empty{color:var(--muted);font-size:13px;padding:6px 0}
+
+/* ladder */
+.ladder{border:2px solid var(--crit);background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ladder.done{border-color:var(--ok)}
+.ladder-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.ladder-h h3{font-size:19px}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.step .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--line)}
+.step.calling{background:var(--warn-soft)} .step.calling .n{background:var(--warn);color:#fff}
+.step.accepted{background:var(--ok-soft)} .step.accepted .n{background:var(--ok);color:#fff}
+.step.noanswer{opacity:.6}
+.step.notified .n{background:var(--accent);color:var(--on-accent)}
+.step small{display:block;color:var(--muted);font-size:12.5px}
+
+/* today */
+.strip{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1px solid var(--wall)}
+
+/* people & health */
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.person{display:flex;flex-direction:column;gap:6px}
+.person .ord{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.person h3{font-size:17px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.chart{width:100%;height:auto;display:block}
+.chart text{font:400 11px var(--f-body);fill:var(--muted)}
+.bignum{font-family:var(--f-display);font-size:40px;font-weight:700;line-height:1}
+.note{font-size:12.5px;color:var(--muted)}
+
+/* toasts & modal */
+.toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:50;max-width:min(360px,calc(100vw - 32px))}
+.toast{background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 14px;font-size:13.5px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:flex-start;animation:tin .25s ease-out}
+.toast b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.toast .lvl{margin-top:5px}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+.modal{position:fixed;inset:0;background:rgba(5,10,9,.55);display:grid;place-items:center;z-index:60;padding:16px}
+.rsp{width:min(380px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;color:#0A0F0E;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.rsp .tag{align-self:flex-start;background:#FADDDA;color:#A52A20;font-weight:700;font-size:12px;border-radius:999px;padding:4px 10px}
+.rsp h3{font-size:22px}
+.rsp .box{background:#F2F4F3;border-radius:14px;padding:12px;font-size:14px}
+.rsp .box b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4A5552;margin-bottom:2px}
+.rsp .acts{display:grid;gap:8px}
+.rsp .acts button{border:0;border-radius:14px;padding:14px;font-size:17px;font-weight:700;color:#fff}
+
+/* plan view */
+.plan{display:flex;flex-direction:column;gap:20px}
+.plan-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:end}
+@media (max-width:900px){.plan-hero{grid-template-columns:minmax(0,1fr)}}
+.plan-hero h2{font-size:clamp(28px,4vw,42px)}
+.plan-hero p{margin:10px 0 0;color:var(--muted);max-width:62ch;font-size:16px}
+.split{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.split{grid-template-columns:minmax(0,1fr)}}
+.split .card{display:flex;flex-direction:column;gap:10px}
+.split ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.kind{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px}
+.kind i{width:10px;height:10px;border-radius:3px}
+.order{display:flex;flex-direction:column;gap:0;counter-reset:s}
+.order li{list-style:none;display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.order li:first-child{border-top:0}
+.order li::before{counter-increment:s;content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.order h3{font-size:16px}
+.order p{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:75ch}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:0}
+code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M12 17s-3-1.8-3-3.6a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.8-3 3.6-3 3.6z"/></svg></div>
+      <div><h1>Dad Care</h1><p>Working prototype of spec v1 · Jos ↔ Abuja · no hardware needed</p></div>
+    </div>
+    <div class="seg" role="tablist" aria-label="View">
+      <button role="tab" id="v-proto" aria-selected="true">Live prototype</button>
+      <button role="tab" id="v-plan" aria-selected="false">What we can build now</button>
+    </div>
+  </header>
+
+  <!-- ================= PROTOTYPE ================= -->
+  <main id="view-proto" class="proto">
+    <div class="left">
+      <div class="side-label"><h2>Dad's phone</h2><span>Galaxy S22 · PWA · press and hold</span></div>
+      <div class="phone"><div class="screen" id="screen">
+        <div class="p-status"><span class="mono" id="pClock">12:40</span><span class="r"><svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.3" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="8.6" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="12.9" y="0" width="3" height="12" rx="1" fill="currentColor" id="sigTop"/></svg><span class="mono" id="pBatt">64%</span></span></div>
+
+        <section class="dview" id="d-home">
+          <div class="d-greet"><div><div class="d-hello" id="dHello">Good afternoon</div><div class="d-time mono" id="dTime">12:40</div></div><div class="d-hello" id="dDate" style="font-size:16px;text-align:right">Sat<br>24 Oct</div></div>
+          <div class="d-share" id="dShare"><i></i><span>Sharing with Phil</span></div>
+          <div class="d-grid">
+            <button class="dbtn ok" id="bOk" aria-label="I'm OK, press and hold"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></span><span class="dlabel">I'm OK</span></button>
+            <button class="dbtn talk" id="bTalk" aria-label="Talk to family, press and hold"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span class="dlabel">Talk to family</span></button>
+            <button class="dbtn med" id="bMed" aria-label="My medicine, press and hold"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="m9.2 7.9 5.6 8.2"/></svg></span><span class="dlabel">My medicine</span></button>
+            <button class="dbtn help" id="bHelp" aria-label="Help, press and hold for 2 seconds"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17.5h.01"/></svg></span><span class="dlabel">Help</span></button>
+          </div>
+          <button class="d-walk" id="bWalk" aria-label="Help me walk, press and hold"><span class="ring sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 21 3-6 3 3v3M7 12l3-4 4 2 3 3M10 8l-1 6"/></svg></span>Help me walk</button>
+        </section>
+
+        <section class="dview" id="d-faces" hidden>
+          <div class="d-title" id="facesTitle">How are you?</div>
+          <div class="faces">
+            <button class="dbtn face-btn good" id="fGood"><span class="ring sm" style="width:58px;height:58px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2.5 4 2.5 4-2.5 4-2.5M9 9.5h.01M15 9.5h.01"/></svg></span><span class="dlabel">Good</span></button>
+            <button class="dbtn face-btn soso" id="fSoso"><span class="ring sm" style="width:58px;height:58px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7M9 9.5h.01M15 9.5h.01"/></svg></span><span class="dlabel">So-so</span></button>
+            <button class="dbtn face-btn bad" id="fBad"><span class="ring sm" style="width:58px;height:58px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 16.5s1.5-2.5 4-2.5 4 2.5 4 2.5M9 9.5h.01M15 9.5h.01"/></svg></span><span class="dlabel">Not good</span></button>
+          </div>
+          <button class="dbtn light back" data-back><span class="dlabel">Back</span></button>
+        </section>
+
+        <section class="dview" id="d-notgood" hidden>
+          <div class="d-title">Do you want Phil to call you?</div>
+          <div class="yesno">
+            <button class="dbtn ok big-action" id="ngYes"><span class="dlabel">Yes, call me</span></button>
+            <button class="dbtn light big-action" id="ngNo"><span class="dlabel">No, thank you</span></button>
+          </div>
+        </section>
+
+        <section class="dview" id="d-talk" hidden>
+          <div class="d-title">Talk to family</div>
+          <div class="d-sub">Hold the circle and speak. Let go to send.</div>
+          <div class="talk-pad">
+            <button class="talk-big" id="talkBig" aria-label="Hold to record a voice note"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><span id="talkLbl">Hold to talk</span></button>
+            <div class="reply" id="lastReply" hidden></div>
+          </div>
+          <button class="dbtn light back" data-back><span class="dlabel">Back</span></button>
+        </section>
+
+        <section class="dview" id="d-med" hidden>
+          <div class="dose-card" id="doseCard"></div>
+          <button class="dbtn med big-action" id="tookIt"><span class="ring sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span class="dlabel">I took it</span></button>
+          <button class="dbtn light back" data-back><span class="dlabel">Back</span></button>
+        </section>
+
+        <section class="dview" id="d-help" hidden>
+          <div class="count"><div class="d-sub">Calling for help in</div><div class="n mono" id="helpN">10</div><div class="d-sub">Hold Cancel if you are fine</div></div>
+          <button class="dbtn light big-action" id="helpCancel"><span class="ring sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span><span class="dlabel">Cancel</span></button>
+        </section>
+
+        <section class="dview" id="d-helpon" hidden>
+          <div class="helpon" id="helpOn">
+            <div class="pulse"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div>
+            <div class="d-title" id="helpOnTitle" style="padding:0">Calling your family</div>
+            <div class="d-sub" id="helpOnSub" style="padding:0">Stay where you are. Phil and Daniel are being called now.</div>
+          </div>
+        </section>
+
+        <section class="dview" id="d-walking" hidden>
+          <div class="beat"><div class="orb" id="orb">Left</div><div class="d-sub mono" id="bpmLbl">96 steps a minute</div></div>
+          <button class="dbtn dark big-action" id="walkStop"><span class="dlabel">Stop</span></button>
+        </section>
+
+        <section class="dview" id="d-msg" hidden>
+          <div class="helpon ok"><div class="pulse" id="msgIcon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div><div class="d-title" id="msgTitle" style="padding:0">Thank you</div><div class="d-sub" id="msgSub" style="padding:0"></div></div>
+        </section>
+
+        <div class="hint" id="hint">Press and hold</div>
+        <div class="caption" id="caption"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><span id="captionT"></span></div>
+      </div></div>
+
+      <section class="sim" aria-label="Device simulator">
+        <div><h2>Device simulator</h2><p class="lead">Stands in for the room sensors, Galaxy Watch, router and Dad's voice. Each button sends the same event the real device will send later.</p></div>
+        <div class="sim-g"><span class="eyebrow">Clock in Jos</span>
+          <div class="clockrow"><span class="mono" id="simClock">12:40 pm</span>
+            <select id="speed" aria-label="Simulation speed"><option value="1">Real time</option><option value="30" selected>30× faster</option><option value="120">120× faster</option></select>
+            <button class="chip" id="skip15">+15 min</button></div>
+        </div>
+        <div class="sim-g"><span class="eyebrow">Room sensors · move Dad</span>
+          <div class="chips" id="roomChips"></div></div>
+        <div class="sim-g"><span class="eyebrow">Watch, phone and house</span>
+          <div class="chips">
+            <button class="chip urgent" id="sFall">Watch: fall detected</button>
+            <button class="chip" id="sWatch" aria-pressed="true">Watch connected</button>
+            <button class="chip" id="sBatt">Phone battery 18%</button>
+            <button class="chip" id="sPower" aria-pressed="false">Power cut at the house</button>
+            <button class="chip" id="sPause" aria-pressed="false">Dad pauses sharing</button>
+          </div></div>
+        <div class="sim-g"><span class="eyebrow">Dad says aloud</span>
+          <div class="chips">
+            <button class="chip" data-say="fine">"I'm fine"</button>
+            <button class="chip" data-say="med">"I took my medicine"</button>
+            <button class="chip" data-say="call">"Call Phil"</button>
+          </div></div>
+        <div class="sim-g"><span class="eyebrow">Scenarios</span>
+          <div class="chips">
+            <button class="chip" id="sMorning">Morning check-in prompt</button>
+            <button class="chip urgent" id="sNoCheck">No check-in, no movement by 10:30</button>
+            <button class="chip" id="sVoice" aria-pressed="true">Spoken prompts on</button>
+          </div></div>
+      </section>
+    </div>
+
+    <section class="dash" aria-label="Phil's dashboard">
+      <div class="side-label"><h2>Phil's dashboard</h2><span>Web · Abuja · updates live</span></div>
+      <div class="dash-top">
+        <div class="daypill" id="dayPill"><span class="dot"></span><div><div class="dp-k" id="dpTitle">All normal today</div><div class="dp-s" id="dpSub">Dad is at home · house online</div></div></div>
+        <button class="btn primary" id="callDad"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Call Dad</button>
+      </div>
+      <div id="ladderBox"></div>
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button role="tab" data-tab="home" aria-selected="true">Home</button>
+        <button role="tab" data-tab="today" aria-selected="false">Today</button>
+        <button role="tab" data-tab="health" aria-selected="false">Health</button>
+        <button role="tab" data-tab="people" aria-selected="false">People</button>
+      </nav>
+
+      <div id="tab-home" class="home">
+        <div class="card">
+          <div class="map-head">
+            <div><div class="eyebrow">Dad's house · Jos</div><div class="status-line" id="statusLine">In his chair <span class="dur" id="statusDur">· 22 min</span></div></div>
+            <div class="badges" id="badges"></div>
+          </div>
+          <svg class="map" id="map" viewBox="0 0 600 380" role="img" aria-label="Floor plan of Dad's house with his avatar"></svg>
+          <p class="note" style="margin:8px 0 0">Map built from room photos and a drag-and-drop layout. Dots are room sensors. No cameras.</p>
+        </div>
+        <div class="col">
+          <div class="card"><h3>Medicine today <span class="note" id="medCount"></span></h3><div id="medList"></div></div>
+          <div class="card"><h3>Voice notes</h3><div id="notes" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div></div>
+          <div class="card"><h3>Alerts <span class="note">urgent · attention · info</span></h3><div class="list" id="alertList"></div></div>
+        </div>
+      </div>
+      <div id="tab-today" class="col" hidden></div>
+      <div id="tab-health" class="col" hidden></div>
+      <div id="tab-people" class="col" hidden></div>
+    </section>
+  </main>
+
+  <!-- ================= PLAN ================= -->
+  <main id="view-plan" class="plan" hidden>
+    <div class="plan-hero">
+      <div><div class="eyebrow">Spec v1 · read in plain terms</div>
+        <h2>Most of Dad Care is software. We can build and test it before buying a single sensor.</h2>
+        <p>The spec has two sides: a four-button phone screen for Dad and a calm dashboard for Phil. Everything they see is a web app. Hardware only feeds it signals: where Dad is, whether he fell, whether the house has power. If we fake those signals with a simulator that speaks the same event format, the whole product can be built and trusted first, and each device later becomes a drop-in replacement.</p></div>
+      <div class="card"><div class="eyebrow">Roadmap coverage without hardware</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px" id="cover"></div></div>
+    </div>
+
+    <div class="split">
+      <div class="card"><span class="kind"><i style="background:var(--ok)"></i>Build for real now</span><h3>Web only, no devices</h3>
+        <ul><li>Dad's four-button PWA with press-and-hold, tremor guard and spoken confirmations</li><li>Check-in faces and the follow-up question</li><li>Medication reminders: speak at dose time, remind at 30 min, alert Phil at 60 min</li><li>Voice notes with transcripts, replies read aloud</li><li>Help me walk beat (audio + vibration)</li><li>Phil's dashboard: day colour, timeline, alerts, people</li><li>Emergency ladder: SMS + voice calls to Jos contacts, 3-minute rollover, responder link</li><li>Offline queue, low-battery and "phone offline" alerts</li><li>Health: adherence and mood trends</li></ul></div>
+      <div class="card"><span class="kind"><i style="background:var(--warn)"></i>Build now, simulate the input</span><h3>Real logic, fake signals</h3>
+        <ul><li>House map setup: room photos, tagged spots, drag-and-drop layout</li><li>Avatar on the map with pose and mood</li><li>State engine: chair, napping, asleep, bathroom, out, not sure</li><li>Alert rules: bathroom too long, no movement by late morning</li><li>Fall alert pipeline (watch fall → urgent ladder)</li><li>"House offline since 2:14 pm" and the daily self-test</li><li>Learned routine, seeded with example days</li></ul></div>
+      <div class="card"><span class="kind"><i style="background:var(--muted)"></i>Needs the hardware</span><h3>Wait for devices</h3>
+        <ul><li>ESP32 + mmWave sensors per room, chair and bed calibration</li><li>Galaxy Watch fall detection, heart rate, BLE beacon</li><li>Android helper: background motion, battery, launcher mode</li><li>Bluetooth BP cuff</li><li>UPS and SIM-backup router at the house</li><li>Tremor test uses the phone's motion sensor (works on the real S22, not in a desktop browser)</li></ul></div>
+    </div>
+
+    <div class="card"><div class="eyebrow">Build order</div><h2 style="font-size:22px;margin:4px 0 6px">Step by step, each step shippable</h2>
+      <ol class="order" style="margin:0;padding:0">
+        <li><div><h3>Foundation: Next.js app + Supabase</h3><p>One Next.js project with two roles (care receiver, caregiver). Create the spec's tables: <code>household</code>, <code>person</code>, <code>device</code>, <code>event</code>, <code>state</code>, <code>alert</code>, <code>routine</code>. Supabase Realtime pushes new events to Phil's screen.</p></div></li>
+        <li><div><h3>Dad's screen as a PWA</h3><p>The four buttons from this prototype, installable to the S22 home screen, pinned large in Samsung Easy Mode. Web Push for dose reminders. Events queue in IndexedDB when data is weak.</p></div></li>
+        <li><div><h3>Phil's dashboard</h3><p>Home, Today, Health and People screens reading live from the event table. The day colour and status line come from one function that turns events into Dad's state.</p></div></li>
+        <li><div><h3>Alert engine and emergency ladder</h3><p>Server rules for urgent, attention and info. Termii or Africa's Talking for SMS and voice calls with "press 1". Test with Phil's and Daniel's own phones in sandbox mode.</p></div></li>
+        <li><div><h3>Device simulator as a real service</h3><p>The simulator on the left becomes a small script that publishes to the MQTT broker on the same topics the ESP32 boards will use. The backend cannot tell it apart from real sensors.</p></div></li>
+        <li><div><h3>House map setup flow</h3><p>Walk-through capture on a phone: photo per room, say its name, tap the chair, bed, toilet and door. Phil arranges room cards on the web. Turn photos into illustrated tiles.</p></div></li>
+        <li><div><h3>Swap in hardware, one device at a time</h3><p>Start with one ESP32 in the sitting room aimed at the chair. Keep the simulator running for the other rooms until each real sensor is paired by QR code.</p></div></li>
+      </ol></div>
+
+    <div class="card"><div class="eyebrow">Simulator → real device</div><h2 style="font-size:22px;margin:4px 0 10px">Every fake signal has a real replacement</h2>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Simulator button</th><th>Event it sends</th><th>Real source later</th></tr></thead>
+        <tbody>
+          <tr><td>Move Dad to a room</td><td><code>presence {room, spot}</code></td><td>ESP32 + mmWave sensor in that room</td></tr>
+          <tr><td>Watch: fall detected</td><td><code>fall {source: watch}</code></td><td>Galaxy Watch fall detection, or bathroom fall radar</td></tr>
+          <tr><td>Phone battery 18%</td><td><code>device {battery: 18}</code></td><td>Android helper (phase 2)</td></tr>
+          <tr><td>Power cut at the house</td><td>silence → <code>house offline</code></td><td>Router and sensors stop reporting; daily self-test</td></tr>
+          <tr><td>Dad says aloud</td><td><code>checkin</code>, <code>dose</code>, <code>call request</code></td><td>Web Speech API on the S22 (works in Chrome on Android)</td></tr>
+          <tr><td>Clock speed</td><td>none</td><td>Real time</td></tr>
+        </tbody></table></div></div>
+
+    <div class="card"><div class="eyebrow">Open questions from the spec</div><h2 style="font-size:22px;margin:4px 0 6px">Answer these before buying hardware</h2>
+      <div class="list" style="margin-top:6px">
+        <div class="li"><span class="lvl attention"></span><div class="b">Will Dad wear a watch every day?<small>If not, budget for bathroom and bedroom fall radar instead.</small></div></div>
+        <div class="li"><span class="lvl attention"></span><div class="b">Who in Jos can do the one-time house setup and fix a sensor that goes offline?</div></div>
+        <div class="li"><span class="lvl attention"></span><div class="b">Which Jos contacts, in what order, and at what hours?<small>The People tab in the prototype uses example names. Replace them with the real ladder.</small></div></div>
+        <div class="li"><span class="lvl attention"></span><div class="b">Does the house have stable Wi-Fi today?<small>Phase 1 only needs Dad's phone data. Phase 2 needs Wi-Fi for the sensors.</small></div></div>
+      </div></div>
+  </main>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="modal" id="modal" hidden></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- house, people, meds (example data Phil would set up) ---------- */
+const ROOMS={
+  sit:{name:'Sitting room',x:20,y:20,w:280,h:200,tint:'--r-sit'},
+  din:{name:'Dining',x:300,y:20,w:150,h:120,tint:'--r-din'},
+  kit:{name:'Kitchen',x:450,y:20,w:130,h:120,tint:'--r-kit'},
+  bed:{name:'Bedroom',x:300,y:140,w:200,h:220,tint:'--r-bed'},
+  bath:{name:'Bathroom',x:500,y:140,w:80,h:220,tint:'--r-bath'},
+  ver:{name:'Veranda',x:20,y:220,w:280,h:140,tint:'--r-ver'}
+};
+const SPOTS={chair:{room:'sit',x:110,y:120,label:'His chair'},bed:{room:'bed',x:420,y:262,label:'His bed'},toilet:{room:'bath',x:540,y:300,label:'Toilet'},table:{room:'din',x:375,y:84,label:'Dining table'},door:{room:'ver',x:160,y:338,label:'Front door'}};
+const SEGFILL={...Object.fromEntries(Object.entries(ROOMS).map(([k,r])=>[k,r.tint])),out:'--r-out',paused:'--r-paused',offline:'--r-paused'};
+const SEGNAME={...Object.fromEntries(Object.entries(ROOMS).map(([k,r])=>[k,r.name])),out:'Out of the house',paused:'Sharing paused',offline:'House offline'};
+const PEOPLE=[
+  {id:'dan',name:'Daniel',rel:"Phil's brother",role:'First responder',hours:[0,24],travel:12},
+  {id:'oka',name:'Mrs Okafor',rel:'Neighbour, next door',role:'Backup',hours:[6,22],travel:2},
+  {id:'mus',name:'Musa',rel:'Family driver',role:'Driver',hours:[7,21],travel:15}
+];
+const P={
+  ldopa:{name:'Carbidopa-levodopa 25/100',note:'1 tablet',c:'#F2C94C',shape:''},
+  asp:{name:'Aspirin 75 mg',note:'1 small tablet',c:'#F4F3EE',shape:'small'},
+  biso:{name:'Bisoprolol 5 mg',note:'1 tablet',c:'#F2A65A',shape:''},
+  ator:{name:'Atorvastatin 20 mg',note:'1 tablet',c:'#FFFFFF',shape:'oval'}
+};
+const HIST=[[3,0,0,'good'],[3,0,0,'good'],[2,1,0,'soso'],[3,0,0,'good'],[2,0,1,'soso'],[3,0,0,'good'],[3,0,0,'good'],[1,1,1,'bad'],[2,1,0,'soso'],[3,0,0,'good'],[3,0,0,'good'],[2,1,0,'good'],[3,0,0,'good'],[3,0,0,'good']];
+const MOOD={good:'Good',soso:'So-so',bad:'Not good'};
+const NOTES=["Phil, the light came back this afternoon. I have eaten my food.","My leg is stiff today but I am okay. Greet the children for me.","Daniel came by in the morning. We watched the news together."];
+
+/* ---------- state ---------- */
+const S={
+  t:12*60+40, speed:30, voice:true,
+  room:'sit', spot:'chair', since:740, movingUntil:0, away:false,
+  mood:'good', lastCheckin:430,
+  online:true, offlineSince:null, pending:[], battery:64, watch:true, paused:false, pausedSince:null,
+  doses:[
+    {id:'am',time:420,label:'Morning',pills:[P.ldopa,P.asp,P.biso],status:'taken',at:435},
+    {id:'noon',time:780,label:'Midday',pills:[P.ldopa],status:'upcoming'},
+    {id:'pm',time:1140,label:'Evening',pills:[P.ldopa,P.ator],status:'upcoming'}
+  ],
+  seg:[{r:'bed',t:360},{r:'bath',t:400},{r:'sit',t:412},{r:'din',t:470},{r:'sit',t:505},{r:'ver',t:630},{r:'sit',t:675},{r:'kit',t:730},{r:'sit',t:740}],
+  events:[], alerts:[], notes:[], ladder:null, flags:{}, noteIx:0
+};
+let tab='home', needs=true, dadView='home';
+const fmt=m=>{m=((Math.floor(m)%1440)+1440)%1440;const h=Math.floor(m/60),mi=m%60;return `${(h%12)||12}:${String(mi).padStart(2,'0')} ${h<12?'am':'pm'}`};
+const fmt24=m=>{m=((Math.floor(m)%1440)+1440)%1440;return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`};
+const dur=m=>{m=Math.max(0,Math.floor(m));return m<60?`${m} min`:`${Math.floor(m/60)} h ${m%60} min`};
+const dirty=()=>{needs=true};
+
+function addEvent(type,text,level='info',fromHouse=true){
+  const ev={t:S.t,type,text,level};
+  if(fromHouse&&!S.online){S.pending.push(ev);return ev}
+  S.events.unshift(ev);dirty();return ev;
+}
+function addAlert(level,title,detail='',fromHouse=true){
+  if(fromHouse&&!S.online){S.pending.push({t:S.t,type:'alert',text:title,level});return null}
+  const a={id:Math.random().toString(36).slice(2),level,title,detail,t:S.t,resolved:level==='info'};
+  S.alerts.unshift(a);
+  S.events.unshift({t:S.t,type:'alert',text:title,level});
+  if(level==='urgent') toast('Phone call + push to Phil',title,'urgent');
+  else if(level==='attention') toast('Push to Phil',title,'attention');
+  dirty();return a;
+}
+// seed the example morning
+[[420,'dose','Morning dose reminder spoken','info'],[430,'checkin','Check-in: Good','info'],[435,'dose','Morning dose taken','info'],[582,'voice','Voice note from Dad','info']].forEach(([t,ty,tx,l])=>S.events.unshift({t,type:ty,text:tx,level:l}));
+S.notes.push({t:582,from:'Dad',text:'Good morning Phil. I slept well. The rain was heavy last night.'});
+
+/* ---------- derived state (spec: "Work out his state") ---------- */
+function derive(){
+  if(S.paused) return {key:'paused',label:'Sharing paused by Dad',sub:'since '+fmt(S.pausedSince),level:'grey'};
+  if(!S.online) return {key:'unsure',label:'Not sure',sub:'house offline since '+fmt(S.offlineSince),level:'grey'};
+  if(S.away) return {key:'out',label:'Out of the house',pose:'walking'};
+  const d=S.t-S.since, hr=(S.t%1440)/60, night=hr>=21||hr<6;
+  if(S.room==='bath') return {key:'bath',label:'In the bathroom',pose:'standing',timer:true};
+  if(S.spot==='bed') return night?{key:'asleep',label:'Asleep',pose:'lying'}:d>=20?{key:'nap',label:'Napping',pose:'lying'}:{key:'rest',label:'Lying on his bed',pose:'lying'};
+  if(S.t<S.movingUntil) return {key:'moving',label:'Moving around',pose:'walking'};
+  if(S.spot==='chair') return {key:'chair',label:'In his chair',pose:'seated'};
+  return {key:'room',label:'In the '+ROOMS[S.room].name.toLowerCase(),pose:S.spot==='table'?'seated':'standing'};
+}
+function dayLevel(){
+  const open=S.alerts.filter(a=>!a.resolved);
+  if(open.some(a=>a.level==='urgent')) return 'red';
+  if(S.paused||!S.online) return 'grey';
+  if(open.some(a=>a.level==='attention')) return 'amber';
+  return 'green';
+}
+
+/* ---------- actions ---------- */
+function segPush(r){const last=S.seg[S.seg.length-1];if(!last||last.r!==r)S.seg.push({r,t:S.t})}
+function moveTo(room,spot){
+  if(!S.online) return;
+  const changed=S.away||room!==S.room;
+  S.away=false;S.room=room;S.spot=spot||null;S.since=S.t;
+  S.flags.bath25=S.flags.bath45=false;
+  if(changed){S.movingUntil=S.t+2;}
+  if(!S.paused){segPush(room);addEvent('presence',(spot?SPOTS[spot].label:ROOMS[room].name)+' · '+ROOMS[room].name)}
+  dirty();
+}
+function leaveHouse(){
+  if(!S.online) return;
+  S.away=true;S.room=null;S.spot=null;S.since=S.t;
+  if(!S.paused){segPush('out');addEvent('presence','Left the house (no presence, phone off home Wi-Fi)')}
+  dirty();
+}
+function checkin(m,via='button'){
+  S.mood=m;S.lastCheckin=S.t;
+  addEvent('checkin','Check-in: '+MOOD[m]+(via==='voice'?' (by voice)':''),'info');
+  if(m==='bad') addAlert('attention','"Not good" check-in','Dad chose Not good');
+  dirty();
+}
+function nextDose(){return S.doses.find(d=>d.status!=='taken')}
+function takeDose(via='button'){
+  const d=nextDose(); if(!d) return null;
+  d.status='taken';d.at=S.t;
+  addEvent('dose',d.label+' dose taken'+(via==='voice'?' (by voice)':''),'info');
+  S.alerts.forEach(a=>{if(a.dose===d.id)a.resolved=true});
+  dirty();return d;
+}
+function available(p){const h=(S.t%1440)/60;return h>=p.hours[0]&&h<p.hours[1]}
+function startLadder(title,detail){
+  if(!S.online){
+    toast('No internet at the house',"Dad's phone is calling Phil directly instead.",'urgent');
+    S.pending.push({t:S.t,type:'alert',text:title+' (sent by direct call)',level:'urgent'});
+    showDadHelpOn('Calling Phil','No internet. Your phone is calling Phil directly.');
+    return;
+  }
+  const a=addAlert('urgent',title,detail);
+  const steps=PEOPLE.filter(available).map(p=>({p,status:'waiting'}));
+  if(steps.length){steps[0].status='calling';steps[0].callAt=S.t}
+  S.ladder={a,steps,start:S.t,outcome:null};
+  steps.length&&toast('Voice call + SMS',`${steps[0].p.name}: "${title}. Press 1 if you can go to him now."`,'urgent');
+  dirty();
+}
+function ladderTick(){
+  const L=S.ladder; if(!L||L.outcome||L.accepted) return;
+  const i=L.steps.findIndex(s=>s.status==='calling'); if(i<0) return;
+  if(S.t-L.steps[i].callAt>=3){
+    L.steps[i].status='noanswer';
+    addEvent('alert',`${L.steps[i].p.name} did not answer in 3 min`,'urgent',false);
+    const n=L.steps[i+1];
+    if(n){n.status='calling';n.callAt=S.t;toast('Voice call + SMS',`Calling ${n.p.name} (${n.p.role.toLowerCase()})`,'urgent')}
+    else {L.exhausted=true;toast('Nobody answered','Call Dad and Jos emergency services (112) now.','urgent')}
+    dirty();
+  }
+}
+function acceptLadder(){
+  const L=S.ladder; const s=L&&L.steps.find(s=>s.status==='calling'); if(!s) return;
+  s.status='accepted';s.at=S.t;L.accepted=s.p;
+  addEvent('alert',`${s.p.name} pressed 1 and is on the way (about ${s.p.travel} min)`,'urgent',false);
+  toast('Responder accepted',`${s.p.name} is going to Dad now`,'info');
+  showDadHelpOn('Help is on the way',`${s.p.name} is coming. About ${s.p.travel} minutes.`,true);
+  speak(`Help is on the way. ${s.p.name} is coming.`);
+  dirty();
+}
+function resolveLadder(outcome){
+  const L=S.ladder; if(!L) return;
+  L.outcome=outcome;L.endAt=S.t;L.a.resolved=true;
+  const who=L.accepted?L.accepted.name:'Responder';
+  addEvent('alert',outcome==='ok'?`${who}: "He's OK"`:`${who}: "Taking him to hospital" (Jos University Teaching Hospital)`,outcome==='ok'?'info':'urgent',false);
+  toast('Update from '+who,outcome==='ok'?"He's OK":'Taking him to Jos University Teaching Hospital',outcome==='ok'?'info':'urgent');
+  closeModal(); showDad('home'); dirty();
+}
+
+/* ---------- rules engine (runs every tick) ---------- */
+function rules(){
+  for(const d of S.doses){
+    if(d.status==='upcoming'&&S.t>=d.time){d.status='due';addEvent('dose',d.label+' dose reminder spoken');dadRemind(d,false)}
+    if(d.status==='due'&&!d.r2&&S.t>=d.time+30){d.r2=true;addEvent('dose',d.label+' dose: second reminder');dadRemind(d,true)}
+    if(d.status==='due'&&S.t>=d.time+60){d.status='late';const a=addAlert('attention',d.label+' dose not confirmed after 60 min');if(a)a.dose=d.id}
+  }
+  if(S.online&&!S.paused&&S.room==='bath'){
+    const m=S.t-S.since;
+    if(m>=25&&!S.flags.bath25){S.flags.bath25=true;addAlert('attention',`In the bathroom ${Math.floor(m)} min, usually 10`)}
+    if(m>=45&&!S.flags.bath45){S.flags.bath45=true;startLadder('In the bathroom far past his usual time','45 min, usually 10')}
+  }
+  ladderTick();
+}
+
+/* ---------- Dad's phone ---------- */
+const DV=['home','faces','notgood','talk','med','help','helpon','walking','msg'];
+function showDad(v){dadView=v;DV.forEach(x=>{$('#d-'+x).hidden=x!==v});if(v==='med')renderDose();if(v!=='walking')stopBeat()}
+let capT;
+function speak(t){
+  $('#captionT').textContent=t;$('#caption').classList.add('show');clearTimeout(capT);capT=setTimeout(()=>$('#caption').classList.remove('show'),Math.max(2600,t.length*70));
+  if(!S.voice) return;
+  try{const u=new SpeechSynthesisUtterance(t);u.rate=.9;u.lang='en-GB';speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}
+}
+let hintT;
+function hint(t){const h=$('#hint');h.textContent=t;h.classList.add('show');clearTimeout(hintT);hintT=setTimeout(()=>h.classList.remove('show'),1400)}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p||40)}catch(e){}}
+// tremor guard: 4+ touches inside 1.5 s locks input briefly
+const downs=[];let lockUntil=0;
+function guard(){const n=performance.now();downs.push(n);while(downs.length&&downs[0]<n-1500)downs.shift();if(n<lockUntil)return true;if(downs.length>=4){lockUntil=n+1500;downs.length=0;hint('Slowly. Press and hold.');return true}return false}
+function holdable(el,ms,fire){
+  let raf=0,start=0;
+  const set=p=>el.style.setProperty('--p',p);
+  const begin=e=>{if(start||guard())return;e&&e.preventDefault();start=performance.now();el.classList.add('holding');
+    const step=now=>{const p=Math.min(1,(now-start)/ms);set(p);if(p>=1){start=0;el.classList.remove('holding');setTimeout(()=>set(0),180);buzz();fire()}else raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)};
+  const stop=()=>{if(!start)return;const held=performance.now()-start;cancelAnimationFrame(raf);start=0;set(0);el.classList.remove('holding');if(held<ms*.85)hint('Press and hold')};
+  el.addEventListener('pointerdown',e=>{try{el.setPointerCapture(e.pointerId)}catch(_){}begin(e)});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,stop));
+  el.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat)begin(e)});
+  el.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')stop()});
+  el.addEventListener('click',e=>e.preventDefault());
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function greet(){const h=(S.t%1440)/60;return h<12?'Good morning':h<17?'Good afternoon':'Good evening'}
+function dadRemind(d,second){
+  if(['help','helpon','walking'].includes(dadView)) return;
+  showDad('med');buzz([200,100,200]);
+  speak(second?`Reminder. It is past time for your ${d.label.toLowerCase()} medicine.`:`It is time for your ${d.label.toLowerCase()} medicine.`);
+}
+function renderDose(){
+  const d=nextDose(),c=$('#doseCard');
+  $('#tookIt').hidden=!d;
+  if(!d){c.innerHTML=`<div class="d-title" style="padding:0">All done for today</div><div class="d-sub" style="padding:0">You have taken all your medicine.</div>`;return}
+  const st=d.status==='upcoming'?`Next: ${d.label.toLowerCase()}`:d.status==='late'?'Late. Please take it now.':'Time to take it now';
+  c.innerHTML=`<div><div class="d-sub" style="padding:0;font-weight:700;color:${d.status==='upcoming'?'var(--p-muted)':'var(--p-med)'}">${st}</div><div class="dose-time mono">${fmt(d.time)}</div></div>
+    <div class="pills">${d.pills.map(p=>`<div class="pillrow"><span class="pill ${p.shape}" style="background:${p.c}"></span><span>${esc(p.name)}<small>${esc(p.note)}</small></span></div>`).join('')}</div>
+    <div style="margin-top:auto;font-size:12px;color:var(--p-muted)">Photos and times are set by Phil. Example schedule.</div>`;
+}
+function dadMsg(title,sub,ms=2600){$('#msgTitle').textContent=title;$('#msgSub').textContent=sub;showDad('msg');setTimeout(()=>{if(dadView==='msg')showDad('home')},ms)}
+function showDadHelpOn(title,sub,ok){showDad('helpon');$('#helpOnTitle').textContent=title;$('#helpOnSub').textContent=sub;$('#helpOn').classList.toggle('ok',!!ok)}
+
+holdable($('#bOk'),1000,()=>{$('#facesTitle').textContent='How are you?';showDad('faces');speak('How are you feeling?')});
+holdable($('#bTalk'),1000,()=>{showDad('talk');speak('Hold the circle and speak.')});
+holdable($('#bMed'),1000,()=>{showDad('med');const d=nextDose();speak(d?`Your ${d.label.toLowerCase()} medicine is at ${fmt(d.time)}.`:'You have taken all your medicine today.')});
+holdable($('#bHelp'),2000,startHelpCountdown);
+holdable($('#bWalk'),1000,startBeat);
+$$('[data-back]').forEach(b=>holdable(b,600,()=>showDad('home')));
+[['#fGood','good'],['#fSoso','soso'],['#fBad','bad']].forEach(([id,m])=>holdable($(id),1000,()=>{
+  checkin(m);
+  if(m==='bad'){showDad('notgood');speak('Do you want Phil to call you?')}
+  else{dadMsg('Thank you','Phil can see you are feeling '+(m==='good'?'good':'so-so')+'.');speak('Thank you. Phil can see how you feel.')}
+}));
+holdable($('#ngYes'),1000,()=>{addAlert('attention','Dad would like you to call him','After a "Not good" check-in');dadMsg('Phil will call you','We have told Phil.');speak('Okay. Phil will call you soon.')});
+holdable($('#ngNo'),1000,()=>{dadMsg('Okay','Rest well. Press I\'m OK any time.');speak('Okay. Rest well.')});
+holdable($('#tookIt'),1000,()=>{const d=takeDose();if(d){dadMsg('Well done','Your '+d.label.toLowerCase()+' medicine is logged.');speak('Thank you. Your medicine is logged.')}});
+
+// talk: hold to record, release to send
+(()=>{const b=$('#talkBig');let st=0,iv=0;
+  const down=e=>{if(st||guard())return;e&&e.preventDefault();st=performance.now();b.classList.add('rec');$('#talkLbl').textContent='Recording 0 s';iv=setInterval(()=>{$('#talkLbl').textContent='Recording '+Math.floor((performance.now()-st)/1000)+' s'},250)};
+  const up=()=>{if(!st)return;const held=performance.now()-st;st=0;clearInterval(iv);b.classList.remove('rec');$('#talkLbl').textContent='Hold to talk';
+    if(held<1000){hint('Hold longer to record');return}
+    const text=NOTES[S.noteIx++%NOTES.length];
+    if(S.online){S.notes.unshift({t:S.t,from:'Dad',text,secs:Math.max(2,Math.round(held/1000))});toast('Voice note from Dad',text,'info')}
+    addEvent('voice','Voice note from Dad');
+    dadMsg('Sent to Phil',S.online?'Your message is on its way.':'No internet. It will send when the network is back.');speak('Sent to Phil.');dirty()};
+  b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>b.addEventListener(t,up));
+  b.addEventListener('keydown',e=>{if(e.key===' '&&!e.repeat)down(e)});b.addEventListener('keyup',e=>{if(e.key===' ')up()});
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+})();
+
+// help countdown
+let helpIv=0,helpN=10;
+function startHelpCountdown(){
+  showDad('help');helpN=10;$('#helpN').textContent=helpN;speak('Calling for help in 10 seconds. Hold cancel if you are fine.');
+  clearInterval(helpIv);helpIv=setInterval(()=>{helpN--;$('#helpN').textContent=helpN;buzz(60);
+    if(helpN<=0){clearInterval(helpIv);showDadHelpOn('Calling your family','Stay where you are. Phil and '+(PEOPLE.find(available)||PEOPLE[0]).name+' are being called now.');speak('Calling your family now.');startLadder('Help button pressed','Dad held Help and did not cancel')}
+  },1000);
+}
+holdable($('#helpCancel'),600,()=>{clearInterval(helpIv);addEvent('alert','Help countdown cancelled by Dad','info');dadMsg('Cancelled','No one was called.');speak('Cancelled.')});
+
+// walking beat
+let actx=null,beatIv=0,beatOn=false;
+const BPM=96;
+function startBeat(){
+  showDad('walking');beatOn=true;$('#bpmLbl').textContent=BPM+' steps a minute · set with his physio';speak('Step with the beat.');
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}
+  let left=true;clearInterval(beatIv);
+  beatIv=setInterval(()=>{const o=$('#orb');o.textContent=left?'Left':'Right';left=!left;o.classList.add('on');setTimeout(()=>o.classList.remove('on'),110);buzz(50);
+    if(actx){try{const g=actx.createGain(),os=actx.createOscillator();os.frequency.value=left?880:660;g.gain.setValueAtTime(.25,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.09);os.connect(g).connect(actx.destination);os.start();os.stop(actx.currentTime+.1)}catch(e){}}
+  },60000/BPM);
+}
+function stopBeat(){if(beatOn){beatOn=false;clearInterval(beatIv)}}
+holdable($('#walkStop'),600,()=>showDad('home'));
+
+/* ---------- Phil's dashboard ---------- */
+function toast(title,body,level='info'){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="lvl ${level}"></span><div><b>${esc(title)}</b>${esc(body)}</div>`;
+  $('#toasts').prepend(t);setTimeout(()=>t.remove(),5200);
+  while($('#toasts').children.length>4)$('#toasts').lastChild.remove();
+}
+const tok=n=>`var(${n})`;
+function buildMap(){
+  let h='';
+  for(const [k,r] of Object.entries(ROOMS)){
+    h+=`<g class="room" data-room="${k}"><rect class="fl" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${tok(r.tint)}"/><text class="rlabel" x="${r.x+12}" y="${r.y+22}">${r.name}</text>
+      <circle class="sensor" id="sn-${k}" cx="${r.x+r.w-12}" cy="${r.y+14}" r="4.5" fill="var(--ok)"/></g>`;
+  }
+  // furniture
+  h+=`<g class="furn">
+    <rect x="92" y="92" width="44" height="40" rx="10"/><rect x="88" y="128" width="52" height="10" rx="5"/>
+    <rect x="200" y="60" width="76" height="12" rx="3"/><rect x="180" y="150" width="90" height="36" rx="10" opacity=".7"/>
+    <circle cx="375" cy="84" r="22"/><rect x="342" y="78" width="10" height="12" rx="3"/><rect x="398" y="78" width="10" height="12" rx="3"/>
+    <rect x="465" y="50" width="100" height="18" rx="3"/><circle cx="545" cy="105" r="10" opacity=".7"/>
+    <rect x="380" y="210" width="90" height="120" rx="8"/><rect x="388" y="216" width="74" height="22" rx="6" fill="var(--surface)" opacity=".7"/>
+    <rect x="320" y="320" width="40" height="28" rx="4" opacity=".7"/>
+    <rect x="528" y="296" width="26" height="30" rx="8"/><rect x="524" y="282" width="34" height="14" rx="4"/>
+    <rect x="512" y="170" width="56" height="40" rx="8" opacity=".7"/>
+    <rect x="60" y="260" width="58" height="34" rx="10" opacity=".7"/>
+    </g>
+    <path d="M140 360 A20 20 0 0 1 160 340 L160 360" fill="none" stroke="var(--wall)" stroke-width="2"/>
+    ${Object.values(SPOTS).map(s=>`<text class="slabel" x="${s.x}" y="${s.y+(s.room==='bed'?60:s.room==='ver'?-8:34)}" text-anchor="middle">${s.label}</text>`).join('')}
+    <text class="slabel" x="300" y="376" text-anchor="middle">Outside · front gate</text>
+    <g id="avatar" style="transform:translate(110px,112px)">
+      <circle class="av-pulse" r="20"/>
+      <circle class="av-halo" id="avHalo" r="21" stroke="var(--ok)"/>
+      <circle r="17" fill="var(--skin)"/>
+      <path d="M-15 -6 A16 16 0 0 1 15 -6 A13 9 0 0 0 -15 -6z" fill="var(--hair)"/>
+      <circle cx="-5.5" cy="0" r="2" fill="#1a1a1a"/><circle cx="5.5" cy="0" r="2" fill="#1a1a1a"/>
+      <path id="avMouth" d="M-6 6 Q0 11 6 6" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+      <text id="avQ" y="6" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" opacity="0">?</text>
+      <g class="av-tag" transform="translate(0,30)"><rect id="avTagBg" x="-30" y="-9" width="60" height="18" rx="9"/><text id="avTag" y="4" text-anchor="middle">seated</text></g>
+    </g>`;
+  $('#map').innerHTML=h;
+}
+function avatarPos(){
+  if(S.away) return [300,368];
+  if(S.spot&&SPOTS[S.spot]) {const s=SPOTS[S.spot];return [s.x,s.y-(S.spot==='bed'?20:8)]}
+  const r=ROOMS[S.room];return [r.x+r.w/2,r.y+r.h/2+10];
+}
+const MOUTH={good:'M-6 6 Q0 11 6 6',soso:'M-5.5 7.5 L5.5 7.5',bad:'M-6 10 Q0 4 6 10'};
+function renderMap(st,lvl){
+  $$('#map .room').forEach(g=>g.classList.toggle('active',!S.away&&S.online&&!S.paused&&g.dataset.room===S.room));
+  Object.keys(ROOMS).forEach(k=>{$('#sn-'+k).setAttribute('fill',S.online?'var(--ok)':'var(--muted)')});
+  const av=$('#avatar'),[x,y]=avatarPos();
+  av.style.transform=`translate(${x}px,${y}px)`;
+  av.style.opacity=S.paused?0:(st.key==='unsure'?.45:1);
+  $('#avMouth').setAttribute('d',MOUTH[S.mood]);
+  $('#avQ').setAttribute('opacity',st.key==='unsure'?1:0);
+  $('#avMouth').setAttribute('opacity',st.key==='unsure'?0:1);
+  $('#avHalo').setAttribute('stroke',lvl==='red'?'var(--crit)':lvl==='amber'?'var(--warn)':lvl==='grey'?'var(--muted)':'var(--ok)');
+  $('#map').classList.toggle('urgent',lvl==='red');
+  const pose=st.key==='unsure'?'last seen':st.pose||'';
+  $('#avTag').textContent=pose;$('#avTagBg').setAttribute('opacity',pose?1:0);
+}
+function renderLadder(){
+  const L=S.ladder,box=$('#ladderBox');
+  if(!L){box.innerHTML='';return}
+  const done=!!L.outcome;
+  const steps=[`<div class="step notified"><span class="n">P</span><div><b>Phil</b><small>Phone call + push sent at ${fmt(L.start)}</small></div><span class="st taken">Notified</span></div>`]
+    .concat(L.steps.map((s,i)=>{
+      const lab={waiting:'<span class="st upcoming">Next</span>',calling:`<span class="st due">Calling · <span class="mono" data-callt>0:00</span></span>`,noanswer:'<span class="st late">No answer</span>',accepted:`<span class="st taken">Accepted ${fmt(s.at)}</span>`}[s.status];
+      return `<div class="step ${s.status}"><span class="n">${i+1}</span><div><b>${s.p.name}</b> · ${s.p.role}<small>${s.p.rel} · about ${s.p.travel} min away · voice call + SMS</small></div>${lab}</div>`}));
+  let acts='';
+  if(!done&&!L.accepted&&!L.exhausted) acts=`<button class="btn sm" id="lAccept">Simulate: ${L.steps.find(s=>s.status==='calling')?.p.name||'responder'} presses 1</button><span class="note">or wait 3 min (sim time) and it rolls to the next person</span>`;
+  if(!done&&L.accepted) acts=`<button class="btn sm primary" id="lLink">Open ${L.accepted.name}'s SMS link</button><span class="note">Responder taps this on arrival</span>`;
+  if(!done&&L.exhausted) acts=`<span class="note" style="color:var(--crit)">Nobody answered. Call Dad, then 112.</span><button class="btn sm" id="lClose">Mark handled</button>`;
+  if(done) acts=`<span class="note">${L.outcome==='ok'?'Resolved: "He\'s OK"':'Taken to Jos University Teaching Hospital'} · ${fmt(L.endAt)}</span><button class="btn sm" id="lClose">Dismiss</button>`;
+  box.innerHTML=`<div class="ladder ${done?'done':''}"><div class="ladder-h"><div><div class="eyebrow" style="color:${done?'var(--ok)':'var(--crit)'}">${done?'Resolved':'Urgent'} · emergency ladder</div><h3>${esc(L.a.title)}</h3><div class="note">Started ${fmt(L.start)} · Phil and the first Jos responder were called at the same time</div></div></div>
+    <div class="steps">${steps.join('')}</div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${acts}</div></div>`;
+  $('#lAccept')&&($('#lAccept').onclick=acceptLadder);
+  $('#lLink')&&($('#lLink').onclick=openResponder);
+  $('#lClose')&&($('#lClose').onclick=()=>{L.a.resolved=true;S.ladder=null;if(dadView==='helpon')showDad('home');dirty()});
+}
+function openResponder(){
+  const L=S.ladder,m=$('#modal');
+  m.innerHTML=`<div class="rsp" role="dialog" aria-label="Responder link"><span class="tag">Dad Care · emergency link</span>
+    <h3>${esc(L.a.title)}</h3><div style="font-size:14px;color:#4A5552">Sent to ${L.accepted.name} by SMS at ${fmt(L.start)}. This link expires when the alert closes.</div>
+    <div class="box"><b>Where</b>Dad's house, Rayfield, Jos (example address)<br>He was last in: ${S.away?'outside':ROOMS[S.room].name}</div>
+    <div class="box"><b>Conditions</b>Parkinsonism after a stroke · previous heart attack</div>
+    <div class="box"><b>Medicines</b>Carbidopa-levodopa 3× daily · Aspirin 75 mg · Bisoprolol 5 mg · Atorvastatin 20 mg</div>
+    <div class="box"><b>Hospital plan</b>Jos University Teaching Hospital (heart and stroke). Backup: Plateau State Specialist Hospital.</div>
+    <div class="box"><b>Phil</b>Abuja · call him from here (number shown in the real link)</div>
+    <div class="acts"><button style="background:#1A7547" id="rOk">He's OK</button><button style="background:#BE281E" id="rHosp">Taking him to hospital</button><button style="background:#5A6763" id="rClose">Close</button></div></div>`;
+  m.hidden=false;
+  $('#rOk').onclick=()=>resolveLadder('ok');$('#rHosp').onclick=()=>resolveLadder('hospital');$('#rClose').onclick=closeModal;
+}
+function closeModal(){$('#modal').hidden=true}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+
+function renderHome(st){
+  const taken=S.doses.filter(d=>d.status==='taken').length;
+  $('#medCount').textContent=`${taken} of ${S.doses.length} taken`;
+  $('#medList').innerHTML=S.doses.map(d=>`<div class="dose"><span class="mono" style="font-size:13px;min-width:44px">${fmt24(d.time)}</span><div class="b"><b>${d.label}</b><div class="mini-pills">${d.pills.map(p=>`<span title="${esc(p.name)}" style="background:${p.c}"></span>`).join('')}</div></div>
+    <span class="st ${d.status}">${d.status==='taken'?'Taken '+fmt(d.at):d.status==='due'?'Due now':d.status==='late'?'Not confirmed':'Upcoming'}</span></div>`).join('');
+  $('#notes').innerHTML=S.notes.slice(0,3).map((n,i)=>`<div class="vnote"><div class="play"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span class="bars"></span><span class="mono">${fmt(n.t)}</span></div><div>${n.from==='Phil'?'<b>You:</b> ':''}${esc(n.text)}</div>
+    ${i===0&&n.from==='Dad'?`<div class="quick"><button class="btn sm" data-reply="Glad you are well, Dad. I will call you tonight.">Reply: I'll call tonight</button><button class="btn sm" data-reply="Thank you Daddy. Please rest and drink water.">Reply: Rest and drink water</button></div>`:''}</div>`).join('')||'<div class="empty">No voice notes yet</div>';
+  $$('[data-reply]').forEach(b=>b.onclick=()=>{const t=b.dataset.reply;S.notes.unshift({t:S.t,from:'Phil',text:t});addEvent('voice','Phil replied',"info",false);
+    $('#lastReply').hidden=false;$('#lastReply').innerHTML=`<b>From Phil · ${fmt(S.t)}</b>${esc(t)}`;speak('Message from Phil. '+t);toast('Sent to Dad','Played aloud on his phone','info');dirty()});
+  const al=S.alerts.slice(0,6);
+  $('#alertList').innerHTML=al.length?al.map(a=>`<div class="li"><span class="lvl ${a.level}"></span><div class="b">${esc(a.title)}<small>${fmt(a.t)} · ${a.level}${a.resolved?' · closed':''}</small></div>${!a.resolved&&a.level==='attention'?`<button class="btn sm" data-ack="${a.id}">Seen</button>`:''}</div>`).join(''):'<div class="empty">Nothing needs you right now.</div>';
+  $$('[data-ack]').forEach(b=>b.onclick=()=>{const a=S.alerts.find(x=>x.id===b.dataset.ack);if(a)a.resolved=true;dirty()});
+  const b=[];
+  b.push(`<span class="badge ${taken<S.doses.filter(d=>d.time<=S.t).length?'warn':''}"><i></i>Meds ${taken}/${S.doses.length}</span>`);
+  b.push(`<span class="badge ${S.watch?'':'warn'}"><i></i>Watch ${S.watch?'connected':'off'}</span>`);
+  b.push(`<span class="badge ${S.battery<=20?'warn':''}"><i></i>Phone ${S.battery}%</span>`);
+  b.push(S.online?`<span class="badge"><i></i>6/6 sensors</span>`:`<span class="badge crit"><i></i>House offline since ${fmt(S.offlineSince)}</span>`);
+  b.push(`<span class="badge"><i></i>Check-in ${fmt(S.lastCheckin)} · ${MOOD[S.mood]}</span>`);
+  $('#badges').innerHTML=b.join('');
+}
+function stripSVG(){
+  const W=800,t0=360,t1=1320,X=t=>Math.max(0,Math.min(W,(t-t0)/(t1-t0)*W));
+  let h='';
+  S.seg.forEach((s,i)=>{const e=i<S.seg.length-1?S.seg[i+1].t:S.t;if(e<=t0)return;h+=`<rect x="${X(s.t)}" y="18" width="${Math.max(1,X(e)-X(s.t))}" height="26" fill="var(${SEGFILL[s.r]})" stroke="var(--wall)" stroke-width=".5"><title>${SEGNAME[s.r]} ${fmt(s.t)}–${fmt(e)}</title></rect>`});
+  for(let t=t0;t<=t1;t+=120)h+=`<line x1="${X(t)}" x2="${X(t)}" y1="44" y2="50" stroke="var(--wall)"/><text x="${X(t)}" y="62" text-anchor="${t===t0?'start':t===t1?'end':'middle'}" style="font:11px var(--f-mono);fill:var(--muted)">${fmt24(t)}</text>`;
+  S.events.filter(e=>['checkin','dose','voice','alert'].includes(e.type)&&!/reminder/.test(e.text)).forEach(e=>{const x=X(e.t),c=e.level==='urgent'?'var(--crit)':e.level==='attention'?'var(--warn)':e.type==='checkin'?'var(--ok)':e.type==='dose'?'var(--accent)':'var(--muted)';
+    h+=e.type==='alert'?`<path d="M${x} 2 l5 9 h-10z" fill="${c}"><title>${esc(e.text)}</title></path>`:`<circle cx="${x}" cy="9" r="4.5" fill="${c}"><title>${fmt(e.t)} ${esc(e.text)}</title></circle>`});
+  h+=`<line x1="${X(S.t)}" x2="${X(S.t)}" y1="0" y2="50" stroke="var(--ink)" stroke-width="2"/>`;
+  return `<svg class="strip" viewBox="-4 0 808 66" role="img" aria-label="Today's timeline by room">${h}</svg>`;
+}
+function renderToday(){
+  $('#tab-today').innerHTML=`<div class="card"><h3>Today, room by room <span class="note">6 am – 10 pm · morning is example data</span></h3><div style="margin:12px 0 8px">${stripSVG()}</div>
+    <div class="legend">${Object.entries(ROOMS).map(([k,r])=>`<span><i style="background:var(${r.tint})"></i>${r.name}</span>`).join('')}<span><i style="background:var(--r-out)"></i>Out / paused</span>
+    <span><i style="background:var(--ok);border-radius:50%"></i>Check-in</span><span><i style="background:var(--accent);border-radius:50%"></i>Dose</span><span><i style="background:var(--muted);border-radius:50%"></i>Voice note</span></div></div>
+    <div class="card"><h3>Everything that happened</h3><div class="list" style="margin-top:6px">${S.events.slice(0,40).map(e=>`<div class="li"><span class="t">${fmt(e.t)}</span><span class="lvl ${e.type==='presence'?'':e.level}"></span><div class="b">${esc(e.text)}<small>${e.type}</small></div></div>`).join('')}</div></div>`;
+}
+function renderHealth(){
+  const days=HIST.length,bw=22,gap=8,H=96;
+  let bars='';HIST.forEach(([on,late,miss,m],i)=>{const x=40+i*(bw+gap);let y=110;
+    [[on,'var(--ok)'],[late,'var(--warn)'],[miss,'var(--crit)']].forEach(([n,c])=>{if(!n)return;const hh=n*H/3;y-=hh;bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${hh-1.5}" rx="3" fill="${c}"/>`});
+    bars+=`<circle cx="${x+bw/2}" cy="128" r="5" fill="${m==='good'?'var(--ok)':m==='soso'?'var(--warn)':'var(--crit)'}"><title>Mood: ${MOOD[m]}</title></circle>`});
+  const total=HIST.reduce((s,d)=>s+3,0),on=HIST.reduce((s,d)=>s+d[0],0),miss=HIST.reduce((s,d)=>s+d[2],0);
+  $('#tab-health').innerHTML=`<div class="grid2">
+    <div class="card"><h3>Doses, last 14 days <span class="note">example history</span></h3>
+      <div style="display:flex;gap:24px;margin:10px 0"><div><div class="bignum">${Math.round(on/total*100)}%</div><div class="note">on time</div></div><div><div class="bignum">${miss}</div><div class="note">missed</div></div></div>
+      <svg class="chart" viewBox="0 0 470 150" role="img" aria-label="Stacked bars of doses on time, late and missed per day, with mood dots">
+        <line x1="34" x2="466" y1="110" y2="110" stroke="var(--line)"/><line x1="34" x2="466" y1="14" y2="14" stroke="var(--line)" stroke-dasharray="3 4"/>
+        <text x="28" y="18" text-anchor="end">3</text><text x="28" y="114" text-anchor="end">0</text>${bars}
+        <text x="40" y="148">10 Oct</text><text x="${40+13*(bw+gap)+bw}" y="148" text-anchor="end">23 Oct</text><text x="28" y="132" text-anchor="end">mood</text></svg>
+      <div class="legend"><span><i style="background:var(--ok)"></i>On time</span><span><i style="background:var(--warn)"></i>Late</span><span><i style="background:var(--crit)"></i>Missed</span></div></div>
+    <div class="card"><h3>Usual day <span class="note">learned after 2 weeks · example</span></h3>
+      <div class="list" style="margin-top:6px">
+        <div class="li"><span class="t">06:40</span><div class="b">Usually up by 7:00<small>Flag if still in bed at 8:30</small></div></div>
+        <div class="li"><span class="t">10 min</span><div class="b">Bathroom visits<small>Attention at 25 min · urgent at 45 min</small></div></div>
+        <div class="li"><span class="t">14:00</span><div class="b">Afternoon nap, about 50 min</div></div>
+        <div class="li"><span class="t">21:30</span><div class="b">Goes to bed</div></div></div></div>
+    <div class="card"><h3>Blood pressure, tremor, voice</h3><p class="note" style="margin:8px 0 0">These arrive in Phase 3. BP needs a Bluetooth cuff, or Dad can say a reading aloud. The 20-second tremor test uses the phone's motion sensor on the S22. All three feed the monthly one-page doctor report.</p></div>
+  </div>`;
+}
+function renderPeople(){
+  $('#tab-people').innerHTML=`<div class="people">${PEOPLE.map((p,i)=>`<div class="card person"><span class="ord">Ladder #${i+1} · ${available(p)?'<span style="color:var(--ok)">reachable now</span>':'outside hours'}</span><h3>${p.name}</h3>
+    <dl class="kv"><dt>Role</dt><dd>${p.role}</dd><dt>Who</dt><dd>${p.rel}</dd><dt>Hours</dt><dd>${p.hours[0]===0&&p.hours[1]===24?'Any time':fmt24(p.hours[0]*60)+'–'+fmt24(p.hours[1]*60)}</dd><dt>To Dad</dt><dd>about ${p.travel} min</dd><dt>Gets</dt><dd>Voice call + SMS link, no app needed</dd></dl></div>`).join('')}</div>
+    <div class="card"><h3>Hospital plan</h3><dl class="kv" style="margin-top:8px"><dt>First choice</dt><dd>Jos University Teaching Hospital (heart and stroke cases)</dd><dt>Backup</dt><dd>Plateau State Specialist Hospital</dd><dt>Shown to</dt><dd>The responder, in the emergency link</dd></dl>
+    <p class="note" style="margin:10px 0 0">Names and hours here are examples. Replace them with the real Jos contacts.</p></div>`;
+}
+function render(){
+  needs=false;
+  const st=derive(),lvl=dayLevel();
+  const dp=$('#dayPill');dp.className='daypill '+(lvl==='green'?'':lvl);
+  const open=S.alerts.filter(a=>!a.resolved);
+  $('#dpTitle').textContent=lvl==='red'?'Urgent: '+open.find(a=>a.level==='urgent').title:lvl==='amber'?'Needs your attention':lvl==='grey'?(S.paused?'Sharing paused by Dad':'House offline'):'All normal today';
+  $('#dpSub').textContent=lvl==='amber'?open.filter(a=>a.level==='attention').map(a=>a.title).join(' · '):lvl==='grey'?(S.paused?'He chose to pause. Help still works.':'Since '+fmt(S.offlineSince)+'. Silence is not shown as all fine.'):'Dad is '+(S.away?'out':'at home')+' · house online · last check-in '+MOOD[S.mood].toLowerCase();
+  $('#statusLine').firstChild.textContent=st.label+' ';
+  renderMap(st,lvl);renderLadder();
+  if(tab==='home')renderHome(st);if(tab==='health')renderHealth();if(tab==='people')renderPeople();
+  $$('#roomChips .chip').forEach(c=>c.disabled=!S.online);
+  $('#pBatt').textContent=S.battery+'%';
+  $('#dShare span').textContent=S.paused?'Sharing paused':'Sharing with Phil';
+  $('#dShare i').style.background=S.paused?'var(--p-muted)':'var(--p-ok)';
+}
+function renderLive(){
+  const st=derive();
+  $('#simClock').textContent=fmt(S.t);$('#pClock').textContent=fmt24(S.t);$('#dTime').textContent=fmt24(S.t);$('#dHello').textContent=greet();
+  $('#statusDur').textContent=st.sub?'· '+st.sub:'· '+dur(S.t-S.since);
+  if(st.key!==renderLive.k){renderLive.k=st.key;dirty()}
+  const c=$('[data-callt]');if(c&&S.ladder){const s=S.ladder.steps.find(s=>s.status==='calling');if(s){const sec=Math.floor((S.t-s.callAt)*60);c.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')}}
+  if(tab==='today'&&(needs||Math.floor(S.t)!==renderLive.m)){renderLive.m=Math.floor(S.t);renderToday()}
+}
+
+/* ---------- simulator wiring ---------- */
+const RCH=[['Sitting room · his chair','sit','chair'],['Bedroom · his bed','bed','bed'],['Bathroom','bath','toilet'],['Kitchen','kit',null],['Dining table','din','table'],['Veranda','ver',null]];
+$('#roomChips').innerHTML=RCH.map(([l,r,s],i)=>`<button class="chip" data-rc="${i}">${l}</button>`).join('')+`<button class="chip" id="sOut">Leaves the house</button>`;
+$$('[data-rc]').forEach(b=>b.onclick=()=>{const [,r,s]=RCH[b.dataset.rc];moveTo(r,s)});
+$('#sOut').onclick=leaveHouse;
+$('#speed').onchange=e=>{S.speed=+e.target.value};
+$('#skip15').onclick=()=>{for(let i=0;i<15;i++){S.t+=1;rules()}dirty()};
+$('#sFall').onclick=()=>{if(!S.watch){toast('Watch not connected','Fall detection needs the watch, a fall radar, or the phone helper.','attention');return}addEvent('fall','Fall detected by watch','urgent');startLadder('Fall detected by watch','Hard fall, no movement after')};
+$('#sWatch').onclick=e=>{S.watch=!S.watch;e.target.setAttribute('aria-pressed',S.watch);addEvent('system','Watch '+(S.watch?'connected':'disconnected'));dirty()};
+$('#sBatt').onclick=()=>{S.battery=18;addAlert('attention',"Dad's phone battery is at 18%",'Ask someone in Jos to charge it');dirty()};
+$('#sPower').onclick=e=>{
+  if(S.online){addEvent('system','House offline: no signal from sensors or router','info',false);S.online=false;S.offlineSince=S.t;segPush('offline');toast('House offline','No signal from sensors since '+fmt(S.t),'info')}
+  else{S.online=true;segPush(S.paused?'paused':S.away?'out':S.room);const n=S.pending.length;S.pending.forEach(ev=>S.events.unshift(ev));S.pending=[];S.events.sort((a,b)=>b.t-a.t);addEvent('system',`House back online · ${n} queued event${n===1?'':'s'} synced`,'info',false);toast('House back online',`${n} queued event${n===1?'':'s'} synced`,'info')}
+  e.target.setAttribute('aria-pressed',!S.online);dirty()};
+$('#sPause').onclick=e=>{S.paused=!S.paused;S.pausedSince=S.t;e.target.setAttribute('aria-pressed',S.paused);segPush(S.paused?'paused':S.away?'out':S.room);addEvent('system',S.paused?'Dad paused sharing':'Dad resumed sharing','info',false);
+  speak(S.paused?'Sharing is paused. Phil can see it is paused. Help still works.':'Sharing is back on.');dirty()};
+$$('[data-say]').forEach(b=>b.onclick=()=>{const k=b.dataset.say;
+  if(k==='fine'){checkin('good','voice');dadMsg('Thank you','Phil can see you are fine.');speak('Thank you. Phil can see you are fine.')}
+  if(k==='med'){const d=takeDose('voice');if(d){dadMsg('Well done','Medicine logged.');speak('Thank you. Your medicine is logged.')}else speak('You have taken all your medicine today.')}
+  if(k==='call'){addAlert('attention','Dad asked you to call him','Said "Call Phil"');dadMsg('Calling Phil','Phil has been told.');speak('Okay. Asking Phil to call you.')}
+});
+$('#sMorning').onclick=()=>{$('#facesTitle').textContent='Good morning, how are you today?';showDad('faces');speak('Good morning. How are you today?')};
+$('#sNoCheck').onclick=()=>{addEvent('system','Rule replay: no check-in by 9:30 and no movement since 6:00','urgent');startLadder('No movement and no check-in by late morning','Replayed rule: no check-in by 9:30, sensors still since 6:00')};
+$('#sVoice').onclick=e=>{S.voice=!S.voice;e.target.setAttribute('aria-pressed',S.voice);e.target.textContent=S.voice?'Spoken prompts on':'Spoken prompts off';if(!S.voice)try{speechSynthesis.cancel()}catch(_){}};
+$('#callDad').onclick=()=>{toast('Calling Dad',"The real app dials Dad's phone. In this prototype nothing is dialled.",'info');speak('Phil is calling.')};
+
+/* ---------- tabs and views ---------- */
+$$('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;$$('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));['home','today','health','people'].forEach(k=>$('#tab-'+k).hidden=k!==tab);dirty();if(tab==='today')renderToday()});
+function setView(v){$('#view-proto').hidden=v!=='proto';$('#view-plan').hidden=v!=='plan';$('#v-proto').setAttribute('aria-selected',v==='proto');$('#v-plan').setAttribute('aria-selected',v==='plan');try{history.replaceState(null,'','#'+(v==='plan'?'plan':'prototype'))}catch(e){}}
+$('#v-proto').onclick=()=>setView('proto');$('#v-plan').onclick=()=>setView('plan');
+if(location.hash==='#plan')setView('plan');
+$('#cover').innerHTML=[['Phase 1 · foundations',95,'var(--ok)','All of it, except pairing the watch'],['Phase 2 · the house',60,'var(--warn)','Map, avatar and states; sensors simulated'],['Phase 3 · learning and health',45,'var(--warn)','Routine, adherence, mood; BP and tremor need devices'],['Phase 4 · other families',30,'var(--muted)','Self-serve setup and languages']]
+  .map(([n,p,c,s])=>`<div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>${n}</span><span class="mono">${p}%</span></div><div style="height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:4px 0"><div style="width:${p}%;height:100%;background:${c}"></div></div><div class="note">${s}</div></div>`).join('');
+
+/* ---------- loop ---------- */
+buildMap();render();renderLive();
+let last=performance.now();
+setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;
+  S.t+=dt*S.speed/60;rules();renderLive();if(needs)render()},250);
+</script>

@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Dad Care tokens (same palette as the prototype in docs/prototype.html).
+   Caregiver screens follow the system theme; Dad's screen is always high-contrast light. */
+:root {
+  --bg: #edf0ef;
+  --surface: #ffffff;
+  --surface-2: #f5f7f6;
+  --ink: #15201d;
+  --muted: #5a6763;
+  --line: #d5dcd9;
+  --accent: #2b3fa0;
+  --accent-soft: #e2e6f6;
+  --on-accent: #ffffff;
+  --ok: #1d7f52;
+  --ok-soft: #ddf1e6;
+  --warn: #a8670f;
+  --warn-soft: #fbebd2;
+  --crit: #c2342a;
+  --crit-soft: #faddda;
+
+  --dad-bg: #ffffff;
+  --dad-ink: #0a0f0e;
+  --dad-ok: #1a7547;
+  --dad-talk: #2b3fa0;
+  --dad-med: #9c5800;
+  --dad-help: #be281e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1412;
+    --surface: #161e1b;
+    --surface-2: #1b2421;
+    --ink: #e6edea;
+    --muted: #95a39e;
+    --line: #2a3531;
+    --accent: #93a4ff;
+    --accent-soft: #232b52;
+    --on-accent: #0e1412;
+    --ok: #3fc98a;
+    --ok-soft: #173327;
+    --warn: #f0b44c;
+    --warn-soft: #3a2c15;
+    --crit: #ff6e61;
+    --crit-soft: #41201d;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-crit: var(--crit);
+  --color-crit-soft: var(--crit-soft);
+  --color-dad-bg: var(--dad-bg);
+  --color-dad-ink: var(--dad-ink);
+  --color-dad-ok: var(--dad-ok);
+  --color-dad-talk: var(--dad-talk);
+  --color-dad-med: var(--dad-med);
+  --color-dad-help: var(--dad-help);
+
+  --font-sans: var(--font-atkinson);
+  --font-display: var(--font-bricolage);
+  --font-mono: var(--font-jetbrains);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}

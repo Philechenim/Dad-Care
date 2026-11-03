@@ -11,12 +11,12 @@ export type Pose = "standing" | "seated" | "lying";
 export type Spot = { id: string; room: RoomId; label: string; x: number; z: number; yaw: number; pose: Pose; height?: number };
 
 export const ROOMS: Room[] = [
-  { id: "sitting", name: "Sitting room", x: 0, z: 0, w: 5.6, d: 4.0, floor: "#d9c3a5" },
-  { id: "dining", name: "Dining", x: 5.6, z: 0, w: 3.0, d: 2.4, floor: "#d5c09f" },
-  { id: "kitchen", name: "Kitchen", x: 8.6, z: 0, w: 2.6, d: 2.4, floor: "#e4e1da" },
-  { id: "bedroom", name: "Bedroom", x: 5.6, z: 2.4, w: 4.0, d: 4.4, floor: "#cdb293" },
-  { id: "bathroom", name: "Bathroom", x: 9.6, z: 2.4, w: 1.6, d: 4.4, floor: "#dfe6e6" },
-  { id: "veranda", name: "Veranda", x: 0, z: 4.0, w: 5.6, d: 2.8, floor: "#c9c2b5" },
+  { id: "sitting", name: "Sitting room", x: 0, z: 0, w: 5.6, d: 4.0, floor: "#9a7350" },
+  { id: "dining", name: "Dining", x: 5.6, z: 0, w: 3.0, d: 2.4, floor: "#93714f" },
+  { id: "kitchen", name: "Kitchen", x: 8.6, z: 0, w: 2.6, d: 2.4, floor: "#a8a297" },
+  { id: "bedroom", name: "Bedroom", x: 5.6, z: 2.4, w: 4.0, d: 4.4, floor: "#8a6646" },
+  { id: "bathroom", name: "Bathroom", x: 9.6, z: 2.4, w: 1.6, d: 4.4, floor: "#8fa4a7" },
+  { id: "veranda", name: "Veranda", x: 0, z: 4.0, w: 5.6, d: 2.8, floor: "#8d867b" },
 ];
 
 // A door sits on the wall between two rooms. axis = the direction the wall runs.

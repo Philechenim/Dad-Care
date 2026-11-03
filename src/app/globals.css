@@ -19,12 +19,21 @@
   --crit: #c2342a;
   --crit-soft: #faddda;
 
-  --dad-bg: #ffffff;
-  --dad-ink: #0a0f0e;
-  --dad-ok: #1a7547;
-  --dad-talk: #2b3fa0;
-  --dad-med: #9c5800;
-  --dad-help: #be281e;
+  /* Dad's screen: soft pale fields, each with deep ink of its own hue (all text 7:1 or better).
+     Fixed light in every theme. No indigo, no gradients, no shadows at rest. */
+  --dad-ground: #f2f2ee;
+  --dad-raised: #ffffff;
+  --dad-ink: #171816;
+  --dad-muted: #4b4f49;
+  --dad-ok-bg: #d8e9db;
+  --dad-ok-ink: #1d4a2f;
+  --dad-talk-bg: #d4e5ea;
+  --dad-talk-ink: #17414d;
+  --dad-med-bg: #f0e1c8;
+  --dad-med-ink: #5c380c;
+  --dad-help-bg: #f3d5cf;
+  --dad-help-ink: #7a2016;
+  --dad-plain-bg: #e3e3de;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -64,12 +73,19 @@
   --color-warn-soft: var(--warn-soft);
   --color-crit: var(--crit);
   --color-crit-soft: var(--crit-soft);
-  --color-dad-bg: var(--dad-bg);
+  --color-dad-ground: var(--dad-ground);
+  --color-dad-raised: var(--dad-raised);
   --color-dad-ink: var(--dad-ink);
-  --color-dad-ok: var(--dad-ok);
-  --color-dad-talk: var(--dad-talk);
-  --color-dad-med: var(--dad-med);
-  --color-dad-help: var(--dad-help);
+  --color-dad-muted: var(--dad-muted);
+  --color-dad-ok-bg: var(--dad-ok-bg);
+  --color-dad-ok-ink: var(--dad-ok-ink);
+  --color-dad-talk-bg: var(--dad-talk-bg);
+  --color-dad-talk-ink: var(--dad-talk-ink);
+  --color-dad-med-bg: var(--dad-med-bg);
+  --color-dad-med-ink: var(--dad-med-ink);
+  --color-dad-help-bg: var(--dad-help-bg);
+  --color-dad-help-ink: var(--dad-help-ink);
+  --color-dad-plain-bg: var(--dad-plain-bg);
 
   --font-sans: var(--font-atkinson);
   --font-display: var(--font-bricolage);
@@ -79,4 +95,59 @@
 body {
   background: var(--bg);
   color: var(--ink);
+}
+
+/* Dad Care hold-to-press buttons (see src/components/dad/HoldButton.tsx). */
+.dc-hold {
+  --p: 0;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.dc-hold[data-holding] {
+  transform: scale(0.98);
+  filter: brightness(0.96);
+}
+
+/* The filling ring that shows how long to keep holding. */
+.dc-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 84px;
+  height: 84px;
+}
+.dc-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(currentColor calc(var(--p) * 360deg), color-mix(in srgb, currentColor 16%, transparent) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+}
+.dc-ring svg {
+  width: 40px;
+  height: 40px;
+}
+.dc-row .dc-ring {
+  width: 60px;
+  height: 60px;
+}
+.dc-row .dc-ring svg {
+  width: 30px;
+  height: 30px;
+}
+.dc-row .dc-ring::before {
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-hold {
+    transition: none;
+  }
 }

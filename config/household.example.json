@@ -1,0 +1,9 @@
+{
+  "_note": "Copy to household.local.json and fill in real details. The .local file is never committed.",
+  "caregiver": { "name": "Phil", "city": "Abuja", "phone": "+234XXXXXXXXXX" },
+  "ladder": [
+    { "order": 1, "name": "First responder", "role": "first_responder", "phone": "+234XXXXXXXXXX", "hours": "any", "travelMinutes": 10 },
+    { "order": 2, "name": "Backup", "role": "backup", "phone": "+234XXXXXXXXXX", "hours": "08:00-21:00", "travelMinutes": 15 }
+  ],
+  "setupAndMaintenance": "Name of the person in Jos who installs and fixes sensors"
+}

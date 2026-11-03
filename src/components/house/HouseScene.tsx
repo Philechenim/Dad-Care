@@ -287,7 +287,7 @@ export default function HouseScene({ mode, route, goal, ringColor, label, faded,
 
       <mesh rotation-x={-Math.PI / 2} position-y={-0.065} receiveShadow>
         <circleGeometry args={[14, 64]} />
-        <meshStandardMaterial color="#dfe3d8" roughness={1} />
+        <meshStandardMaterial color="#3a4842" roughness={1} />
       </mesh>
       <ContactShadows position={[0, -0.06, 0]} opacity={0.35} scale={20} blur={2.4} far={4} />
 

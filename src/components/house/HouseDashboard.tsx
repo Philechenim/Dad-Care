@@ -131,7 +131,7 @@ export function HouseDashboard() {
       </header>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="relative h-[min(68vh,640px)] min-h-[380px] overflow-hidden rounded-2xl border border-line bg-[#eef0ea]" aria-label="3D view of Dad's house">
+        <section className="relative h-[min(68vh,640px)] min-h-[380px] overflow-hidden rounded-2xl border border-line bg-[#24302b]" aria-label="3D view of Dad's house">
           <HouseScene
             mode={mode}
             route={route}
@@ -143,7 +143,7 @@ export function HouseDashboard() {
             activeRoom={room === "outside" ? null : room}
             bathroomBadge={place.activity === "bathroom" ? forHowLong || "just now" : null}
           />
-          <p className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-surface/85 px-2 py-1 text-xs text-muted">
+          <p className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-black/35 px-2 py-1 text-xs text-white/90">
             {mode === "3d" ? "Drag to turn · scroll to zoom" : "Plan view from above"}
           </p>
         </section>

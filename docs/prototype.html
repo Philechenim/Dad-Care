@@ -6,7 +6,7 @@
 /* Layout: Dad's phone + device simulator on the left, Phil's live dashboard on the right; a second view holds the build plan. */
 :root{
   --bg:#EDF0EF; --surface:#FFFFFF; --surface-2:#F5F7F6; --ink:#15201D; --muted:#5A6763; --line:#D5DCD9;
-  --accent:#2B3FA0; --accent-soft:#E2E6F6; --on-accent:#FFFFFF;
+  --accent:#1D6B66; --accent-soft:#DCECEA; --on-accent:#FFFFFF;
   --ok:#1D7F52; --ok-soft:#DDF1E6; --warn:#A8670F; --warn-soft:#FBEBD2; --crit:#C2342A; --crit-soft:#FADDDA;
   --r-sit:#E2EBE4; --r-din:#ECE5D6; --r-kit:#E7E0EE; --r-bed:#DCE4F1; --r-bath:#D9ECEE; --r-ver:#E8ECDF;
   --r-out:#D9DEDC; --r-paused:#CDD3D1; --wall:#9AA7A3; --furn:#B9C3BF; --room-ink:#3D4946;
@@ -20,14 +20,14 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E1412; --surface:#161E1B; --surface-2:#1B2421; --ink:#E6EDEA; --muted:#95A39E; --line:#2A3531;
-  --accent:#93A4FF; --accent-soft:#232B52; --on-accent:#0E1412;
+  --accent:#7CC9C0; --accent-soft:#17302D; --on-accent:#0E1412;
   --ok:#3FC98A; --ok-soft:#173327; --warn:#F0B44C; --warn-soft:#3A2C15; --crit:#FF6E61; --crit-soft:#41201D;
   --r-sit:#1E2A24; --r-din:#2A261E; --r-kit:#27222D; --r-bed:#1D2432; --r-bath:#1B2A2D; --r-ver:#232A1E;
   --r-out:#232B28; --r-paused:#2A3330; --wall:#4D5B57; --furn:#3B4743; --room-ink:#C3CEC9;
   --hair:#BDBDB7; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1412; --surface:#161E1B; --surface-2:#1B2421; --ink:#E6EDEA; --muted:#95A39E; --line:#2A3531;
-  --accent:#93A4FF; --accent-soft:#232B52; --on-accent:#0E1412;
+  --accent:#7CC9C0; --accent-soft:#17302D; --on-accent:#0E1412;
   --ok:#3FC98A; --ok-soft:#173327; --warn:#F0B44C; --warn-soft:#3A2C15; --crit:#FF6E61; --crit-soft:#41201D;
   --r-sit:#1E2A24; --r-din:#2A261E; --r-kit:#27222D; --r-bed:#1D2432; --r-bath:#1B2A2D; --r-ver:#232A1E;
   --r-out:#232B28; --r-paused:#2A3330; --wall:#4D5B57; --furn:#3B4743; --room-ink:#C3CEC9;
@@ -285,6 +285,52 @@ table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
 th,td{text-align:left;padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
 th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:0}
 code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+
+/* ---------- v2: Dad's phone is frosted glass over the sky above Jos ---------- */
+.screen{--sky-top:#8ec5e8;--sky-mid:#cfe7f2;--sky-low:#eef4ee;--glow:#fff6d8;--glow-at:82% 6%;--hill-far:#a9c3a2;--hill-near:#8aae87;--head-ink:#171816;--head-muted:#2f3a35;--ga:.56;
+  background:radial-gradient(circle at var(--glow-at),var(--glow) 0,transparent 34%),linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 45%,var(--sky-low) 100%);color:var(--head-ink);transition:background 1.5s}
+.screen[data-period="morning"]{--sky-top:#f4c497;--sky-mid:#f6e2c8;--sky-low:#d5e6ec;--glow:#ffe2ad;--glow-at:16% 10%;--hill-far:#bccab4;--hill-near:#9cb29b}
+.screen[data-period="evening"]{--sky-top:#e29c86;--sky-mid:#f0c6b1;--sky-low:#e8dad4;--glow:#ffcf9f;--glow-at:80% 26%;--hill-far:#a88581;--hill-near:#8a6a67;--head-ink:#22160f;--head-muted:#3b2a22}
+.screen[data-period="night"]{--sky-top:#1b2944;--sky-mid:#2f4368;--sky-low:#4a5d80;--glow:#c3cfe8;--glow-at:72% 32%;--hill-far:#2b3a56;--hill-near:#1f2b42;--head-ink:#fff;--head-muted:#dbe2ef;--ga:.72}
+.screen .hills{position:absolute;left:0;right:0;bottom:0;width:100%;height:42%;pointer-events:none}
+.hills .hf{fill:var(--hill-far)} .hills .hn{fill:var(--hill-near)}
+.screen>.dview,.screen>.p-status{position:relative;z-index:1}
+.caption,.hint{z-index:5}
+.d-time,.d-title{color:var(--head-ink)} .d-hello,.d-sub,.d-share{color:var(--head-muted)}
+.dbtn,.d-walk,.talk-big,.reply,.dose-card,.beat .orb{
+  background:color-mix(in srgb,var(--tint,#5d6560) 14%,rgb(255 255 255 / var(--ga,.56)))!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);
+  border:1px solid rgb(255 255 255 / .7);box-shadow:inset 0 1px 0 rgb(255 255 255 / .65),0 14px 32px -18px rgb(16 28 36 / .45);color:var(--ink-t,#171816)}
+.dbtn.holding,.d-walk.holding{filter:brightness(.95)}
+.dbtn.ok,.face-btn.good{--tint:#2e7d57;--ink-t:#17402a}
+.dbtn.talk,.talk-big{--tint:#2a6f86;--ink-t:#143c49}
+.dbtn.med{--tint:#b06a1a;--ink-t:#563308}
+.dbtn.help,.face-btn.bad{--tint:#c4473b;--ink-t:#6f1c13}
+.dbtn.light,.dbtn.dark,.d-walk,.face-btn.soso{--tint:#5d6560;--ink-t:#171816}
+.dose-card{--tint:#b06a1a;--ga:.86;--head-ink:#171816;--head-muted:#3f443f}
+.talk-big.rec{box-shadow:0 0 0 14px rgb(42 111 134 / .25)}
+.ring{color:#fff}
+.ring::before{background:conic-gradient(var(--tint) calc(var(--p)*360deg),color-mix(in srgb,var(--tint) 22%,transparent) 0)}
+.ring::after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--tint);box-shadow:0 6px 14px -6px var(--tint)}
+.ring svg{position:relative;z-index:1;width:32px;height:32px}
+.ring.sm::after{inset:7px} .ring.sm svg{width:20px;height:20px}
+.count .n{color:#6f1c13} .screen[data-period="night"] .count .n{color:#ffb4aa}
+.beat .orb.on{background:color-mix(in srgb,#2e7d57 30%,rgb(255 255 255 / .7))!important}
+@supports not (backdrop-filter:blur(1px)){.dbtn,.d-walk,.talk-big,.reply,.dose-card,.beat .orb{background:color-mix(in srgb,var(--tint,#5d6560) 12%,#f7f7f4)!important}}
+
+/* ---------- v2: 3D house ---------- */
+.map3d{position:relative;width:100%;aspect-ratio:600/380;min-height:280px;border-radius:12px;overflow:hidden;background:#24302b;touch-action:none}
+.map3d canvas{display:block;width:100%!important;height:100%!important}
+.lbl3,.tag3{position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;will-change:transform}
+.lbl3{font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;background:rgb(255 255 255 / .86);color:#15201D}
+.tag3{font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;background:#15201D;color:#fff}
+.badge3{border-radius:10px;text-align:center}
+.view3{position:absolute;right:10px;top:10px;z-index:3}
+.view3 button{padding:5px 12px;font-size:13px}
+.map3d .hint3{position:absolute;left:10px;bottom:10px;z-index:3;font-size:12px;color:#e6edea;background:rgb(0 0 0 / .35);border-radius:6px;padding:2px 8px;pointer-events:none}
+.demo-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 14px;font-weight:700}
+.demo-bar .demo-n{font-variant-numeric:tabular-nums;opacity:.7;font-weight:400}
+.demo-bar .btn{margin-left:auto;background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -292,19 +338,21 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
   <header class="top">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M12 17s-3-1.8-3-3.6a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.8-3 3.6-3 3.6z"/></svg></div>
-      <div><h1>Dad Care</h1><p>Working prototype of spec v1 · Jos ↔ Abuja · no hardware needed</p></div>
+      <div><h1>Dad Care</h1><p>Prototype v2 · matches the app built so far · no hardware needed</p></div>
     </div>
-    <div class="seg" role="tablist" aria-label="View">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="demoBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>Play demo</button><div class="seg" role="tablist" aria-label="View">
       <button role="tab" id="v-proto" aria-selected="true">Live prototype</button>
       <button role="tab" id="v-plan" aria-selected="false">What we can build now</button>
-    </div>
+    </div></div>
   </header>
+  <div class="demo-bar" id="demoBar" hidden><span class="demo-n" id="demoStep"></span><span id="demoText"></span><button class="btn sm" id="demoStop">Stop</button></div>
 
   <!-- ================= PROTOTYPE ================= -->
   <main id="view-proto" class="proto">
     <div class="left">
       <div class="side-label"><h2>Dad's phone</h2><span>Galaxy S22 · PWA · press and hold</span></div>
-      <div class="phone"><div class="screen" id="screen">
+      <div class="phone"><div class="screen" id="screen" data-period="afternoon">
+        <svg class="hills" viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true"><path class="hf" d="M0 118C38 96 70 70 108 80c30 8 42-22 78-24 32-2 46 30 80 32 34 2 54-24 90-20 24 3 36 14 44 18v114H0Z"/><path class="hn" d="M0 158c48-20 80-32 128-20 40 10 72-20 118-16 40 4 54 26 94 22 30-3 46-14 60-11v67H0Z"/></svg>
         <div class="p-status"><span class="mono" id="pClock">12:40</span><span class="r"><svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.3" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="8.6" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="12.9" y="0" width="3" height="12" rx="1" fill="currentColor" id="sigTop"/></svg><span class="mono" id="pBatt">64%</span></span></div>
 
         <section class="dview" id="d-home">
@@ -362,7 +410,7 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
           <div class="helpon" id="helpOn">
             <div class="pulse"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div>
             <div class="d-title" id="helpOnTitle" style="padding:0">Calling your family</div>
-            <div class="d-sub" id="helpOnSub" style="padding:0">Stay where you are. Phil and Daniel are being called now.</div>
+            <div class="d-sub" id="helpOnSub" style="padding:0">Stay where you are. Phil and Mom are being called now.</div>
           </div>
         </section>
 
@@ -431,8 +479,8 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
             <div><div class="eyebrow">Dad's house · Jos</div><div class="status-line" id="statusLine">In his chair <span class="dur" id="statusDur">· 22 min</span></div></div>
             <div class="badges" id="badges"></div>
           </div>
-          <svg class="map" id="map" viewBox="0 0 600 380" role="img" aria-label="Floor plan of Dad's house with his avatar"></svg>
-          <p class="note" style="margin:8px 0 0">Map built from room photos and a drag-and-drop layout. Dots are room sensors. No cameras.</p>
+          <div class="map3d" id="map3d" role="img" aria-label="3D view of Dad's house with his avatar"><div class="seg view3" id="view3"><button aria-selected="true" data-v="3d">3D</button><button aria-selected="false" data-v="plan">Plan</button></div><span class="hint3">Drag to turn · scroll to zoom</span></div>
+          <p class="note" style="margin:8px 0 0">Example layout. The real one is built from Phil's room photos and sizes. In the bathroom only a closed door is shown. No cameras.</p>
         </div>
         <div class="col">
           <div class="card"><h3>Medicine today <span class="note" id="medCount"></span></h3><div id="medList"></div></div>
@@ -470,7 +518,7 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
         <li><div><h3>Foundation: Next.js app + Supabase</h3><p>One Next.js project with two roles (care receiver, caregiver). Create the spec's tables: <code>household</code>, <code>person</code>, <code>device</code>, <code>event</code>, <code>state</code>, <code>alert</code>, <code>routine</code>. Supabase Realtime pushes new events to Phil's screen.</p></div></li>
         <li><div><h3>Dad's screen as a PWA</h3><p>The four buttons from this prototype, installable to the S22 home screen, pinned large in Samsung Easy Mode. Web Push for dose reminders. Events queue in IndexedDB when data is weak.</p></div></li>
         <li><div><h3>Phil's dashboard</h3><p>Home, Today, Health and People screens reading live from the event table. The day colour and status line come from one function that turns events into Dad's state.</p></div></li>
-        <li><div><h3>Alert engine and emergency ladder</h3><p>Server rules for urgent, attention and info. Termii or Africa's Talking for SMS and voice calls with "press 1". Test with Phil's and Daniel's own phones in sandbox mode.</p></div></li>
+        <li><div><h3>Alert engine and emergency ladder</h3><p>Server rules for urgent, attention and info. Termii or Africa's Talking for SMS and voice calls with "press 1". Test with Phil's, Mom's and Jay's own phones in sandbox mode.</p></div></li>
         <li><div><h3>Device simulator as a real service</h3><p>The simulator on the left becomes a small script that publishes to the MQTT broker on the same topics the ESP32 boards will use. The backend cannot tell it apart from real sensors.</p></div></li>
         <li><div><h3>House map setup flow</h3><p>Walk-through capture on a phone: photo per room, say its name, tap the chair, bed, toilet and door. Phil arranges room cards on the web. Turn photos into illustrated tiles.</p></div></li>
         <li><div><h3>Swap in hardware, one device at a time</h3><p>Start with one ESP32 in the sitting room aimed at the chair. Keep the simulator running for the other rooms until each real sensor is paired by QR code.</p></div></li>
@@ -488,12 +536,12 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
           <tr><td>Clock speed</td><td>none</td><td>Real time</td></tr>
         </tbody></table></div></div>
 
-    <div class="card"><div class="eyebrow">Open questions from the spec</div><h2 style="font-size:22px;margin:4px 0 6px">Answer these before buying hardware</h2>
+    <div class="card"><div class="eyebrow">Open questions from the spec</div><h2 style="font-size:22px;margin:4px 0 6px">Answered by Phil</h2>
       <div class="list" style="margin-top:6px">
-        <div class="li"><span class="lvl attention"></span><div class="b">Will Dad wear a watch every day?<small>If not, budget for bathroom and bedroom fall radar instead.</small></div></div>
-        <div class="li"><span class="lvl attention"></span><div class="b">Who in Jos can do the one-time house setup and fix a sensor that goes offline?</div></div>
-        <div class="li"><span class="lvl attention"></span><div class="b">Which Jos contacts, in what order, and at what hours?<small>The People tab in the prototype uses example names. Replace them with the real ladder.</small></div></div>
-        <div class="li"><span class="lvl attention"></span><div class="b">Does the house have stable Wi-Fi today?<small>Phase 1 only needs Dad's phone data. Phase 2 needs Wi-Fi for the sensors.</small></div></div>
+        <div class="li"><span class="lvl info"></span><div class="b">Will Dad wear a watch every day?<small>Answered: yes, a watch or bracelet will be sourced.</small></div></div>
+        <div class="li"><span class="lvl info"></span><div class="b">Who in Jos can do the one-time house setup and fix a sensor that goes offline?<small>Answered: Jay, Phil's elder brother.</small></div></div>
+        <div class="li"><span class="lvl info"></span><div class="b">Which Jos contacts, in what order, and at what hours?<small>Answered: Mom first, then Jay. Reachable hours still to confirm.</small></div></div>
+        <div class="li"><span class="lvl info"></span><div class="b">Does the house have stable Wi-Fi today?<small>Answered: yes.</small></div></div>
       </div></div>
   </main>
 </div>
@@ -501,6 +549,8 @@ code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface-2);padd
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="modal" id="modal" hidden></div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -518,9 +568,8 @@ const SPOTS={chair:{room:'sit',x:110,y:120,label:'His chair'},bed:{room:'bed',x:
 const SEGFILL={...Object.fromEntries(Object.entries(ROOMS).map(([k,r])=>[k,r.tint])),out:'--r-out',paused:'--r-paused',offline:'--r-paused'};
 const SEGNAME={...Object.fromEntries(Object.entries(ROOMS).map(([k,r])=>[k,r.name])),out:'Out of the house',paused:'Sharing paused',offline:'House offline'};
 const PEOPLE=[
-  {id:'dan',name:'Daniel',rel:"Phil's brother",role:'First responder',hours:[0,24],travel:12},
-  {id:'oka',name:'Mrs Okafor',rel:'Neighbour, next door',role:'Backup',hours:[6,22],travel:2},
-  {id:'mus',name:'Musa',rel:'Family driver',role:'Driver',hours:[7,21],travel:15}
+  {id:'mom',name:'Mom',rel:"Phil's mother",role:'First responder',hours:[0,24],travel:null},
+  {id:'jay',name:'Jay',rel:"Phil's elder brother · sets up the sensors",role:'Backup',hours:[0,24],travel:null}
 ];
 const P={
   ldopa:{name:'Carbidopa-levodopa 25/100',note:'1 tablet',c:'#F2C94C',shape:''},
@@ -530,7 +579,7 @@ const P={
 };
 const HIST=[[3,0,0,'good'],[3,0,0,'good'],[2,1,0,'soso'],[3,0,0,'good'],[2,0,1,'soso'],[3,0,0,'good'],[3,0,0,'good'],[1,1,1,'bad'],[2,1,0,'soso'],[3,0,0,'good'],[3,0,0,'good'],[2,1,0,'good'],[3,0,0,'good'],[3,0,0,'good']];
 const MOOD={good:'Good',soso:'So-so',bad:'Not good'};
-const NOTES=["Phil, the light came back this afternoon. I have eaten my food.","My leg is stiff today but I am okay. Greet the children for me.","Daniel came by in the morning. We watched the news together."];
+const NOTES=["Phil, the light came back this afternoon. I have eaten my food.","My leg is stiff today but I am okay. Greet the children for me.","Jay came by in the morning. We watched the news together."];
 
 /* ---------- state ---------- */
 const S={
@@ -651,9 +700,9 @@ function ladderTick(){
 function acceptLadder(){
   const L=S.ladder; const s=L&&L.steps.find(s=>s.status==='calling'); if(!s) return;
   s.status='accepted';s.at=S.t;L.accepted=s.p;
-  addEvent('alert',`${s.p.name} pressed 1 and is on the way (about ${s.p.travel} min)`,'urgent',false);
+  addEvent('alert',`${s.p.name} pressed 1 and is on the way`,'urgent',false);
   toast('Responder accepted',`${s.p.name} is going to Dad now`,'info');
-  showDadHelpOn('Help is on the way',`${s.p.name} is coming. About ${s.p.travel} minutes.`,true);
+  showDadHelpOn('Help is on the way',`${s.p.name} is coming now. Stay where you are.`,true);
   speak(`Help is on the way. ${s.p.name} is coming.`);
   dirty();
 }
@@ -788,59 +837,147 @@ function toast(title,body,level='info'){
   $('#toasts').prepend(t);setTimeout(()=>t.remove(),5200);
   while($('#toasts').children.length>4)$('#toasts').lastChild.remove();
 }
-const tok=n=>`var(${n})`;
-function buildMap(){
-  let h='';
-  for(const [k,r] of Object.entries(ROOMS)){
-    h+=`<g class="room" data-room="${k}"><rect class="fl" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${tok(r.tint)}"/><text class="rlabel" x="${r.x+12}" y="${r.y+22}">${r.name}</text>
-      <circle class="sensor" id="sn-${k}" cx="${r.x+r.w-12}" cy="${r.y+14}" r="4.5" fill="var(--ok)"/></g>`;
+/* ---------- 3D house (three.js) · same layout as src/lib/house/house.ts ---------- */
+const R3={sit:{x:0,z:0,w:5.6,d:4,floor:0xd9c3a5},din:{x:5.6,z:0,w:3,d:2.4,floor:0xd5c09f},kit:{x:8.6,z:0,w:2.6,d:2.4,floor:0xe4e1da},
+  bed:{x:5.6,z:2.4,w:4,d:4.4,floor:0xcdb293},bath:{x:9.6,z:2.4,w:1.6,d:4.4,floor:0xdfe6e6},ver:{x:0,z:4,w:5.6,d:2.8,floor:0xc9c2b5}};
+const DOORS3=[['sit','din',5.6,1.2,1.0,'z'],['din','kit',8.6,1.2,.9,'z'],['sit','bed',5.6,3.3,.9,'z'],['bed','bath',9.6,3.4,.8,'z'],['sit','ver',2.8,4,1.2,'x'],['out','ver',2.0,6.8,1.0,'x']];
+const SP3={chair:{x:1.7,z:1.6,yaw:Math.PI,pose:'seated',h:.45},bed:{x:7.9,z:5.3,yaw:0,pose:'lying',h:.55},toilet:{x:10.4,z:6.2,yaw:Math.PI,pose:'seated',h:.42},
+  table:{x:7.1,z:1.75,yaw:Math.PI,pose:'seated',h:.46},door:{x:2.0,z:6.3,yaw:0,pose:'standing'}};
+const ROOMSPOT={kit:{x:9.9,z:1.25,yaw:Math.PI,pose:'standing'},ver:{x:4.6,z:4.6,yaw:0,pose:'seated',h:.44}};
+const W3=11.2,D3=6.8,WH=1.15,WT=.1;
+let T3=null;
+const std=(c,r=.8)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+function b(P,x,y,z,w,h,d,c,r){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),std(c,r));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;P.add(m);return m}
+function cy(P,x,y,z,rt,rb,h,c,r){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,32),std(c,r));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;P.add(m);return m}
+function sph(P,x,y,z,rad,c){const m=new THREE.Mesh(new THREE.SphereGeometry(rad,20,16),std(c,.9));m.position.set(x,y,z);m.castShadow=true;P.add(m);return m}
+function grp(P,x,z,yaw){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=yaw;P.add(g);return g}
+function wallPieces(k,r){
+  const edges=[{axis:'x',line:r.z,at:r.z+WT/2,from:r.x,to:r.x+r.w},{axis:'x',line:r.z+r.d,at:r.z+r.d-WT/2,from:r.x,to:r.x+r.w},
+    {axis:'z',line:r.x,at:r.x+WT/2,from:r.z,to:r.z+r.d},{axis:'z',line:r.x+r.w,at:r.x+r.w-WT/2,from:r.z,to:r.z+r.d}];
+  const out=[];
+  for(const e of edges){
+    const gaps=DOORS3.filter(([a,bb,x,z,w,ax])=>(a===k||bb===k)&&ax===e.axis&&Math.abs((ax==='x'?z:x)-e.line)<.01)
+      .map(([a,bb,x,z,w,ax])=>{const c=ax==='x'?x:z;return [c-w/2,c+w/2]}).sort((p,q)=>p[0]-q[0]);
+    let st=e.from;
+    for(const [g0,g1] of [...gaps,[e.to,e.to]]){if(g0-st>.05){const mid=(st+g0)/2;out.push({cx:e.axis==='x'?mid:e.at,cz:e.axis==='x'?e.at:mid,len:g0-st,axis:e.axis})}st=g1}
   }
-  // furniture
-  h+=`<g class="furn">
-    <rect x="92" y="92" width="44" height="40" rx="10"/><rect x="88" y="128" width="52" height="10" rx="5"/>
-    <rect x="200" y="60" width="76" height="12" rx="3"/><rect x="180" y="150" width="90" height="36" rx="10" opacity=".7"/>
-    <circle cx="375" cy="84" r="22"/><rect x="342" y="78" width="10" height="12" rx="3"/><rect x="398" y="78" width="10" height="12" rx="3"/>
-    <rect x="465" y="50" width="100" height="18" rx="3"/><circle cx="545" cy="105" r="10" opacity=".7"/>
-    <rect x="380" y="210" width="90" height="120" rx="8"/><rect x="388" y="216" width="74" height="22" rx="6" fill="var(--surface)" opacity=".7"/>
-    <rect x="320" y="320" width="40" height="28" rx="4" opacity=".7"/>
-    <rect x="528" y="296" width="26" height="30" rx="8"/><rect x="524" y="282" width="34" height="14" rx="4"/>
-    <rect x="512" y="170" width="56" height="40" rx="8" opacity=".7"/>
-    <rect x="60" y="260" width="58" height="34" rx="10" opacity=".7"/>
-    </g>
-    <path d="M140 360 A20 20 0 0 1 160 340 L160 360" fill="none" stroke="var(--wall)" stroke-width="2"/>
-    ${Object.values(SPOTS).map(s=>`<text class="slabel" x="${s.x}" y="${s.y+(s.room==='bed'?60:s.room==='ver'?-8:34)}" text-anchor="middle">${s.label}</text>`).join('')}
-    <text class="slabel" x="300" y="376" text-anchor="middle">Outside · front gate</text>
-    <g id="avatar" style="transform:translate(110px,112px)">
-      <circle class="av-pulse" r="20"/>
-      <circle class="av-halo" id="avHalo" r="21" stroke="var(--ok)"/>
-      <circle r="17" fill="var(--skin)"/>
-      <path d="M-15 -6 A16 16 0 0 1 15 -6 A13 9 0 0 0 -15 -6z" fill="var(--hair)"/>
-      <circle cx="-5.5" cy="0" r="2" fill="#1a1a1a"/><circle cx="5.5" cy="0" r="2" fill="#1a1a1a"/>
-      <path id="avMouth" d="M-6 6 Q0 11 6 6" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
-      <text id="avQ" y="6" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" opacity="0">?</text>
-      <g class="av-tag" transform="translate(0,30)"><rect id="avTagBg" x="-30" y="-9" width="60" height="18" rx="9"/><text id="avTag" y="4" text-anchor="middle">seated</text></g>
-    </g>`;
-  $('#map').innerHTML=h;
+  return out;
 }
-function avatarPos(){
-  if(S.away) return [300,368];
-  if(S.spot&&SPOTS[S.spot]) {const s=SPOTS[S.spot];return [s.x,s.y-(S.spot==='bed'?20:8)]}
-  const r=ROOMS[S.room];return [r.x+r.w/2,r.y+r.h/2+10];
+function furniture(H){
+  b(H,2.6,.005,2.0,2.6,.01,1.8,0x9d7f63,1);
+  let G=grp(H,1.7,1.66,Math.PI);[[0,.22,-.06,.82,.36,.78,0x7f5f49],[0,.44,-.02,.6,.1,.62,0xc8b394],[0,.62,-.4,.82,.78,.16,0x7f5f49],[-.36,.42,-.06,.12,.42,.78,0x7f5f49],[.36,.42,-.06,.12,.42,.78,0x7f5f49]].forEach(a=>b(G,...a));
+  G=grp(H,.62,2.2,Math.PI/2);[[0,.22,0,2.1,.4,.86,0x93a58e],[0,.58,-.34,2.1,.5,.2,0x93a58e],[-.62,.46,.04,.9,.1,.64,0xb8c5b1],[.4,.46,.04,.9,.1,.64,0xb8c5b1]].forEach(a=>b(G,...a));
+  b(H,2.8,.36,2.15,1.0,.05,.55,0xa27b55);[-.42,.42].forEach(lx=>[-.22,.22].forEach(lz=>b(H,2.8+lx,.17,2.15+lz,.04,.34,.04,0x7d5c3f)));
+  b(H,2.8,.24,.36,1.7,.48,.42,0x6d5645);b(H,2.8,.9,.3,1.25,.72,.06,0x1c1e20,.35);
+  cy(H,5.15,.25,.45,.18,.15,.5,0xb9a58a);sph(H,5.15,.75,.45,.32,0x5f8a5a);
+  cy(H,7.1,.74,1.1,.56,.56,.05,0xa27b55);cy(H,7.1,.37,1.1,.07,.12,.72,0x7d5c3f);
+  [[7.1,1.82,Math.PI],[6.35,1.1,Math.PI/2],[7.85,1.1,-Math.PI/2]].forEach(([x,z,yw])=>{const C=grp(H,x,z,yw);b(C,0,.44,-.04,.44,.05,.42,0x9b744f);b(C,0,.74,-.24,.44,.56,.05,0x9b744f);[-.18,.18].forEach(lx=>[-.22,.14].forEach(lz=>b(C,lx,.21,lz,.04,.42,.04,0x7d5c3f)))});
+  b(H,9.9,.44,.38,2.4,.88,.6,0xe9e5dd);b(H,9.9,.9,.38,2.44,.04,.64,0x5f5a54,.5);b(H,9.5,.93,.38,.55,.02,.45,0x2a2a2a,.4);b(H,10.85,.9,1.85,.62,1.8,.62,0xf4f4f2,.4);
+  b(H,7.9,.2,5.3,1.62,.36,2.14,0x8a6a4f);b(H,7.9,.62,4.22,1.62,1.0,.1,0x7a5c43);b(H,7.9,.46,5.34,1.5,.2,2.0,0xf3efe8);b(H,7.9,.6,4.52,.95,.13,.36,0xffffff);b(H,7.9,.58,5.72,1.54,.06,1.3,0x6f8fa8);
+  b(H,6.72,.28,4.45,.46,.56,.42,0x9a7a5c);cy(H,6.72,.68,4.45,.09,.12,.24,0xefe3c8);b(H,7.4,.95,2.78,1.5,1.9,.56,0x9a7a5c);
+  cy(H,10.4,.2,6.28,.19,.16,.4,0xf7f7f5,.3);cy(H,10.4,.42,6.28,.21,.21,.04,0xffffff,.3);b(H,10.4,.62,6.6,.46,.5,.2,0xf7f7f5,.3);
+  b(H,10.4,.82,2.72,.55,.16,.42,0xffffff,.3);cy(H,10.4,.38,2.68,.07,.1,.74,0xf2f2f0,.3);b(H,10.4,.03,4.7,1.3,.06,1.3,0xe3ebee,.3);
+  G=grp(H,4.6,4.4,0);b(G,0,.42,0,1.5,.06,.42,0x9b744f);b(G,0,.7,-.19,1.5,.5,.05,0x9b744f);[-.68,.68].forEach(lx=>b(G,lx,.2,0,.06,.4,.38,0x7d5c3f));
+  [[.45,6.35],[5.15,6.35]].forEach(([x,z])=>{cy(H,x,.22,z,.2,.16,.44,0xa5674b);sph(H,x,.62,z,.3,0x628f59)});
+  [7.2,7.75,8.3].forEach(z=>b(H,2.0,.01,z,.8,.02,.42,0xb5ab9c,1));
 }
-const MOUTH={good:'M-6 6 Q0 11 6 6',soso:'M-5.5 7.5 L5.5 7.5',bad:'M-6 10 Q0 4 6 10'};
+function makeAvatar(){
+  const mats=[];const m=(c,r=.8)=>{const x=new THREE.MeshStandardMaterial({color:c,roughness:r,transparent:true});mats.push(x);return x};
+  const SK=m(0x7a4a2e,.6),KF=m(0x4a7896,.9),TR=m(0x35607c,.9),HR=m(0xd9d7d0,1),SH=m(0x2a2420,.7),GL=m(0x1d1d1d,.3);
+  const ms=(g,mat,x=0,y=0,z=0)=>{const o=new THREE.Mesh(g,mat);o.position.set(x,y,z);o.castShadow=true;return o};
+  const root=new THREE.Group(),body=new THREE.Group(),lie=new THREE.Group(),hips=new THREE.Group();root.add(body);body.add(lie);lie.add(hips);hips.position.y=.86;
+  hips.add(ms(new THREE.CylinderGeometry(.16,.24,.8,24),KF,0,.24,0));hips.add(ms(new THREE.CylinderGeometry(.05,.055,.1,12),SK,0,.66,0));
+  const head=new THREE.Group();head.position.y=.82;hips.add(head);
+  head.add(ms(new THREE.SphereGeometry(.13,28,20),SK));head.add(ms(new THREE.SphereGeometry(.134,24,12,0,Math.PI*2,.85,.9),HR));
+  const beard=ms(new THREE.SphereGeometry(.075,16,12),HR,0,-.085,.06);beard.scale.set(1,.8,.75);head.add(beard);
+  const cap=ms(new THREE.CylinderGeometry(.118,.13,.1,24),TR,0,.105,0);cap.rotation.z=.12;head.add(cap);
+  head.add(ms(new THREE.SphereGeometry(.022,10,8),SK,0,-.01,.13));
+  for(const x of [-.045,.045]){head.add(ms(new THREE.SphereGeometry(.012,8,8),GL,x,.018,.118));head.add(ms(new THREE.TorusGeometry(.03,.005,8,20),GL,x,.018,.124))}
+  head.add(ms(new THREE.BoxGeometry(.03,.006,.006),GL,0,.018,.124));
+  const arm=x=>{const g=new THREE.Group();g.position.set(x,.56,0);g.add(ms(new THREE.CapsuleGeometry(.05,.22,4,12),KF,0,-.15,0));const e=new THREE.Group();e.position.y=-.3;e.add(ms(new THREE.CapsuleGeometry(.042,.18,4,12),SK,0,-.12,0));e.add(ms(new THREE.SphereGeometry(.05,12,10),SK,0,-.26,0));g.add(e);hips.add(g);return [g,e]};
+  const leg=x=>{const g=new THREE.Group();g.position.x=x;g.add(ms(new THREE.CapsuleGeometry(.068,.3,4,12),TR,0,-.21,0));const k=new THREE.Group();k.position.y=-.43;k.add(ms(new THREE.CapsuleGeometry(.058,.3,4,12),TR,0,-.2,0));k.add(ms(new THREE.BoxGeometry(.1,.07,.21),SH,0,-.4,.045));g.add(k);hips.add(g);return [g,k]};
+  const [armL,elbowL]=arm(-.21),[armR,elbowR]=arm(.21),[legL,kneeL]=leg(-.09),[legR,kneeR]=leg(.09);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.36,.46,48),new THREE.MeshBasicMaterial({color:0x2e7d57,transparent:true,opacity:.85}));ring.rotation.x=-Math.PI/2;ring.position.y=.02;root.add(ring);
+  return {root,body,lie,hips,armL,armR,elbowL,elbowR,legL,legR,kneeL,kneeR,ring,mats,queue:[],goal:null,hide:false,urgent:false,st:{yaw:Math.PI,seat:0,lie:0,walk:0,phase:0}};
+}
+function stepAvatar(A,dt,t){
+  const g=A.root,st=A.st,q=A.queue,goal=A.goal||{yaw:0,pose:'standing'};
+  let walking=false,yawGoal=goal.yaw;
+  if(q.length){const [tx,tz]=q[0],dx=tx-g.position.x,dz=tz-g.position.z,dist=Math.hypot(dx,dz);
+    if(dist<.04)q.shift();else{walking=true;yawGoal=Math.atan2(dx,dz);if(st.seat<.08&&st.lie<.08){const s=Math.min(dist,1.1*dt);g.position.x+=dx/dist*s;g.position.z+=dz/dist*s}}}
+  const pose=walking?'standing':goal.pose,k=Math.min(1,dt*4.5);
+  st.seat+=((pose==='seated'?1:0)-st.seat)*k;st.lie+=((pose==='lying'?1:0)-st.lie)*k;st.walk+=((walking&&st.seat<.1&&st.lie<.1?1:0)-st.walk)*k;
+  st.yaw+=Math.atan2(Math.sin(yawGoal-st.yaw),Math.cos(yawGoal-st.yaw))*Math.min(1,dt*6);st.phase+=dt*7.5*st.walk;g.rotation.y=st.yaw;
+  const sw=Math.sin(st.phase)*.5*st.walk,sh=goal.h??.45;
+  A.hips.position.y=.86+(sh+.08-.86)*st.seat+Math.abs(Math.sin(st.phase))*.03*st.walk;
+  A.legL.rotation.x=-Math.PI/2*st.seat+sw;A.legR.rotation.x=-Math.PI/2*st.seat-sw;
+  A.kneeL.rotation.x=Math.PI/2*st.seat+Math.max(0,-sw)*.9;A.kneeR.rotation.x=Math.PI/2*st.seat+Math.max(0,sw)*.9;
+  A.armL.rotation.x=-sw*.8-.35*st.seat;A.armR.rotation.x=sw*.8-.35*st.seat;A.elbowL.rotation.x=A.elbowR.rotation.x=-.7*st.seat-.25*st.walk;
+  const bh=(goal.h??.55)+.12;A.lie.rotation.x=-Math.PI/2*st.lie;A.lie.position.set(0,bh*st.lie,.85*st.lie);
+  A.ring.scale.setScalar(A.urgent?1+.3*(.5+.5*Math.sin(t*4)):1);
+}
+function roomPath3(from,to){const prev=new Map([[from,null]]),q=[from];while(q.length){const c=q.shift();if(c===to)break;for(const [a,bb] of DOORS3){const n=a===c?bb:bb===c?a:null;if(n&&n!=='out'&&!prev.has(n)){prev.set(n,c);q.push(n)}}}
+  const p=[];for(let at=to;at;at=prev.get(at))p.unshift(at);return p[0]===from?p:[to]}
+function route3(from,to){const rooms=roomPath3(from,to.room),pts=[];for(let i=0;i<rooms.length-1;i++){const d=DOORS3.find(([a,bb])=>(a===rooms[i]&&bb===rooms[i+1])||(bb===rooms[i]&&a===rooms[i+1]));if(d)pts.push([d[2],d[3]])}pts.push([to.x,to.z]);return pts}
+function goal3(){
+  if(S.away)return {room:'out',x:2.0,z:7.8,yaw:0,pose:'standing'};
+  const sp=S.spot&&SP3[S.spot];if(sp)return {room:S.room,...sp};
+  const rs=ROOMSPOT[S.room];if(rs)return {room:S.room,...rs};
+  const r=R3[S.room];return {room:S.room,x:r.x+r.w/2,z:r.z+r.d/2,yaw:0,pose:'standing'};
+}
+function buildMap(){
+  const host=$('#map3d');
+  if(!window.THREE||!THREE.OrbitControls){host.insertAdjacentHTML('beforeend','<p class="note" style="padding:24px">The 3D view could not load here.</p>');return}
+  try{
+    THREE.ColorManagement.legacyMode=false;
+    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));
+    renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.prepend(renderer.domElement);
+    const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(38,1.5,.1,100);cam.position.set(6.5,9.5,10.5);
+    const ctl=new THREE.OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minDistance=6;ctl.maxDistance=22;ctl.maxPolarAngle=1.25;
+    scene.add(new THREE.HemisphereLight(0xfff6ea,0x8c9686,1.0));
+    const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(6,12,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-9,right:9,top:9,bottom:-9});sun.shadow.bias=-.0004;scene.add(sun);
+    const ground=new THREE.Mesh(new THREE.CircleGeometry(14,64),std(0x3a4842,1));ground.rotation.x=-Math.PI/2;ground.position.y=-.065;ground.receiveShadow=true;scene.add(ground);
+    const H=new THREE.Group();H.position.set(-W3/2,0,-D3/2);scene.add(H);
+    const floors={};for(const [k,r] of Object.entries(R3)){const f=b(H,r.x+r.w/2,-.03,r.z+r.d/2,r.w,.06,r.d,r.floor,.9);f.castShadow=false;floors[k]=f}
+    for(const [k,r] of Object.entries(R3))for(const w of wallPieces(k,r)){b(H,w.cx,WH/2,w.cz,w.axis==='x'?w.len:WT,WH,w.axis==='x'?WT:w.len,0xf3ede3,.95);const c=b(H,w.cx,WH+.012,w.cz,w.axis==='x'?w.len:WT+.01,.025,w.axis==='x'?WT+.01:w.len,0xd6cab8,.9);c.castShadow=false}
+    furniture(H);
+    const av=makeAvatar();H.add(av.root);
+    const mk=c=>{const el=document.createElement('span');el.className=c;host.appendChild(el);return el};
+    const labels=Object.entries(R3).map(([k,r])=>{const el=mk('lbl3');el.textContent=ROOMS[k].name;return {el,x:r.x+r.w/2-W3/2,z3:r.z+r.d-.3-D3/2,zp:r.z+.4-D3/2}});
+    T3={renderer,scene,cam,ctl,floors,av,labels,tag:mk('tag3'),badge:mk('tag3 badge3'),host,mode:'3d',camGoal:new THREE.Vector3(6.5,9.5,10.5),moving:false,clock:new THREE.Clock()};
+    const resize=()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()};
+    new ResizeObserver(resize).observe(host);resize();
+    renderer.setAnimationLoop(frame3);
+    $$('#view3 button').forEach(bt=>bt.onclick=()=>{T3.mode=bt.dataset.v;T3.camGoal.set(...(T3.mode==='plan'?[0,15.5,.01]:[6.5,9.5,10.5]));T3.moving=true;ctl.enableRotate=T3.mode==='3d';
+      $$('#view3 button').forEach(x=>x.setAttribute('aria-selected',x===bt));$('.hint3').textContent=T3.mode==='plan'?'Plan view from above':'Drag to turn · scroll to zoom'});
+  }catch(e){T3=null;host.insertAdjacentHTML('beforeend','<p class="note" style="padding:24px">The 3D view needs WebGL, which this browser has turned off.</p>')}
+}
+const V3=window.THREE?new THREE.Vector3():null,ORIGIN3=window.THREE?new THREE.Vector3():null;
+function frame3(){
+  const T=T3,dt=Math.min(T.clock.getDelta(),.05),w=T.host.clientWidth,h=T.host.clientHeight;
+  if(T.moving){const k=Math.min(1,dt*3);T.cam.position.lerp(T.camGoal,k);T.ctl.target.lerp(ORIGIN3,k);if(T.cam.position.distanceTo(T.camGoal)<.05)T.moving=false}
+  T.ctl.update();stepAvatar(T.av,dt,T.clock.elapsedTime);
+  const place=(el,x,y,z)=>{V3.set(x,y,z).project(T.cam);el.style.transform=`translate(${(V3.x+1)/2*w}px,${(1-V3.y)/2*h}px) translate(-50%,-50%)`};
+  T.labels.forEach(l=>place(l.el,l.x,.05,T.mode==='plan'?l.zp:l.z3));
+  const A=T.av,hidden=A.hide&&!A.queue.length;
+  A.body.visible=A.ring.visible=!hidden&&!S.paused;T.tag.style.display=hidden||S.paused?'none':'';
+  const p=A.root.position;place(T.tag,p.x-W3/2,2.05-1.15*A.st.lie-.42*A.st.seat,p.z-D3/2);
+  const bath=hidden&&!S.paused;T.badge.style.display=bath?'':'none';
+  if(bath){T.badge.textContent='Door closed · '+dur(S.t-S.since);place(T.badge,10.4-W3/2,1.5,4.6-D3/2)}
+  T.renderer.render(T.scene,T.cam);
+}
 function renderMap(st,lvl){
-  $$('#map .room').forEach(g=>g.classList.toggle('active',!S.away&&S.online&&!S.paused&&g.dataset.room===S.room));
-  Object.keys(ROOMS).forEach(k=>{$('#sn-'+k).setAttribute('fill',S.online?'var(--ok)':'var(--muted)')});
-  const av=$('#avatar'),[x,y]=avatarPos();
-  av.style.transform=`translate(${x}px,${y}px)`;
-  av.style.opacity=S.paused?0:(st.key==='unsure'?.45:1);
-  $('#avMouth').setAttribute('d',MOUTH[S.mood]);
-  $('#avQ').setAttribute('opacity',st.key==='unsure'?1:0);
-  $('#avMouth').setAttribute('opacity',st.key==='unsure'?0:1);
-  $('#avHalo').setAttribute('stroke',lvl==='red'?'var(--crit)':lvl==='amber'?'var(--warn)':lvl==='grey'?'var(--muted)':'var(--ok)');
-  $('#map').classList.toggle('urgent',lvl==='red');
-  const pose=st.key==='unsure'?'last seen':st.pose||'';
-  $('#avTag').textContent=pose;$('#avTagBg').setAttribute('opacity',pose?1:0);
+  if(!T3)return;const A=T3.av,g=goal3(),key=g.room+':'+g.x+','+g.z;
+  if(key!==T3.key){
+    if(T3.key===undefined){A.root.position.set(g.x,0,g.z);A.st.yaw=g.yaw;A.st.seat=g.pose==='seated'?1:0;A.st.lie=g.pose==='lying'?1:0}
+    else{const from=T3.room==='out'?'ver':T3.room;let pts=g.room==='out'?[...route3(from,{room:'ver',x:2.0,z:6.4}),[2.0,6.8],[g.x,g.z]]:route3(from,g);if(T3.room==='out')pts=[[2.0,6.8],...pts];A.queue=pts}
+    T3.key=key;T3.room=g.room;
+  }
+  A.goal=g;A.hide=S.room==='bath'&&!S.away;A.urgent=lvl==='red';
+  const fade=st.key==='unsure'||S.away;A.mats.forEach(m=>{m.opacity=fade?.35:1});
+  A.ring.material.color.set(lvl==='red'?0xc4473b:lvl==='amber'?0xc08a1e:lvl==='grey'?0x8a9590:0x2e7d57);
+  for(const [k,f] of Object.entries(T3.floors)){const on=!S.away&&S.online&&!S.paused&&k===S.room;f.material.emissive.set(on?0xffd9a0:0x000000);f.material.emissiveIntensity=on?.18:0}
+  T3.tag.textContent='Dad · '+st.label;
 }
 function renderLadder(){
   const L=S.ladder,box=$('#ladderBox');
@@ -849,7 +986,7 @@ function renderLadder(){
   const steps=[`<div class="step notified"><span class="n">P</span><div><b>Phil</b><small>Phone call + push sent at ${fmt(L.start)}</small></div><span class="st taken">Notified</span></div>`]
     .concat(L.steps.map((s,i)=>{
       const lab={waiting:'<span class="st upcoming">Next</span>',calling:`<span class="st due">Calling · <span class="mono" data-callt>0:00</span></span>`,noanswer:'<span class="st late">No answer</span>',accepted:`<span class="st taken">Accepted ${fmt(s.at)}</span>`}[s.status];
-      return `<div class="step ${s.status}"><span class="n">${i+1}</span><div><b>${s.p.name}</b> · ${s.p.role}<small>${s.p.rel} · about ${s.p.travel} min away · voice call + SMS</small></div>${lab}</div>`}));
+      return `<div class="step ${s.status}"><span class="n">${i+1}</span><div><b>${s.p.name}</b> · ${s.p.role}<small>${s.p.rel}${s.p.travel?` · about ${s.p.travel} min away`:''} · voice call + SMS</small></div>${lab}</div>`}));
   let acts='';
   if(!done&&!L.accepted&&!L.exhausted) acts=`<button class="btn sm" id="lAccept">Simulate: ${L.steps.find(s=>s.status==='calling')?.p.name||'responder'} presses 1</button><span class="note">or wait 3 min (sim time) and it rolls to the next person</span>`;
   if(!done&&L.accepted) acts=`<button class="btn sm primary" id="lLink">Open ${L.accepted.name}'s SMS link</button><span class="note">Responder taps this on arrival</span>`;
@@ -938,9 +1075,9 @@ function renderHealth(){
 }
 function renderPeople(){
   $('#tab-people').innerHTML=`<div class="people">${PEOPLE.map((p,i)=>`<div class="card person"><span class="ord">Ladder #${i+1} · ${available(p)?'<span style="color:var(--ok)">reachable now</span>':'outside hours'}</span><h3>${p.name}</h3>
-    <dl class="kv"><dt>Role</dt><dd>${p.role}</dd><dt>Who</dt><dd>${p.rel}</dd><dt>Hours</dt><dd>${p.hours[0]===0&&p.hours[1]===24?'Any time':fmt24(p.hours[0]*60)+'–'+fmt24(p.hours[1]*60)}</dd><dt>To Dad</dt><dd>about ${p.travel} min</dd><dt>Gets</dt><dd>Voice call + SMS link, no app needed</dd></dl></div>`).join('')}</div>
+    <dl class="kv"><dt>Role</dt><dd>${p.role}</dd><dt>Who</dt><dd>${p.rel}</dd><dt>Hours</dt><dd>${p.hours[0]===0&&p.hours[1]===24?'Any time':fmt24(p.hours[0]*60)+'–'+fmt24(p.hours[1]*60)}</dd><dt>To Dad</dt><dd>${p.travel?'about '+p.travel+' min':'Not set yet'}</dd><dt>Gets</dt><dd>Voice call + SMS link, no app needed</dd></dl></div>`).join('')}</div>
     <div class="card"><h3>Hospital plan</h3><dl class="kv" style="margin-top:8px"><dt>First choice</dt><dd>Jos University Teaching Hospital (heart and stroke cases)</dd><dt>Backup</dt><dd>Plateau State Specialist Hospital</dd><dt>Shown to</dt><dd>The responder, in the emergency link</dd></dl>
-    <p class="note" style="margin:10px 0 0">Names and hours here are examples. Replace them with the real Jos contacts.</p></div>`;
+    <p class="note" style="margin:10px 0 0">This is Phil's real ladder: Mom first, then Jay. Hours are not set yet, so both count as reachable any time.</p></div>`;
 }
 function render(){
   needs=false;
@@ -959,6 +1096,7 @@ function render(){
 }
 function renderLive(){
   const st=derive();
+  const hr=Math.floor((S.t%1440)/60);$('#screen').dataset.period=hr<5?'night':hr<11?'morning':hr<17?'afternoon':hr<20?'evening':'night';
   $('#simClock').textContent=fmt(S.t);$('#pClock').textContent=fmt24(S.t);$('#dTime').textContent=fmt24(S.t);$('#dHello').textContent=greet();
   $('#statusDur').textContent=st.sub?'· '+st.sub:'· '+dur(S.t-S.since);
   if(st.key!==renderLive.k){renderLive.k=st.key;dirty()}
@@ -999,6 +1137,40 @@ $('#v-proto').onclick=()=>setView('proto');$('#v-plan').onclick=()=>setView('pla
 if(location.hash==='#plan')setView('plan');
 $('#cover').innerHTML=[['Phase 1 · foundations',95,'var(--ok)','All of it, except pairing the watch'],['Phase 2 · the house',60,'var(--warn)','Map, avatar and states; sensors simulated'],['Phase 3 · learning and health',45,'var(--warn)','Routine, adherence, mood; BP and tremor need devices'],['Phase 4 · other families',30,'var(--muted)','Self-serve setup and languages']]
   .map(([n,p,c,s])=>`<div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>${n}</span><span class="mono">${p}%</span></div><div style="height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:4px 0"><div style="width:${p}%;height:100%;background:${c}"></div></div><div class="note">${s}</div></div>`).join('');
+
+
+/* ---------- guided demo: a day with Dad Care ---------- */
+let demoRun=0;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function playDemo(){
+  const run=++demoRun,alive=()=>run===demoRun;
+  setView('proto');S.speed=30;$('#speed').value='30';
+  if(!S.online)$('#sPower').click();if(S.paused)$('#sPause').click();
+  $('[data-tab="home"]').click();if(S.ladder){S.ladder.a.resolved=true;S.ladder=null}
+  const steps=[
+    ["Each morning the phone asks how he is. He holds a face to answer.",async()=>{$('#facesTitle').textContent='Good morning, how are you today?';showDad('faces');speak('Good morning. How are you today?');await wait(2600);checkin('good');dadMsg('Thank you','Phil can see you are feeling good.')}],
+    ["He logs his medicine with one long press. Phil sees it ticked.",async()=>{showDad('med');renderDose();await wait(2400);const d=takeDose();if(d)dadMsg('Well done','Your '+d.label.toLowerCase()+' medicine is logged.')}],
+    ["Room sensors notice him walk to the kitchen. The avatar follows through the doors.",async()=>{showDad('home');moveTo('kit',null)}],
+    ["Then he sits down at the dining table.",async()=>{moveTo('din','table')}],
+    ["He holds Talk to family and sends Phil a voice note.",async()=>{showDad('talk');await wait(1600);const text=NOTES[S.noteIx++%NOTES.length];S.notes.unshift({t:S.t,from:'Dad',text});addEvent('voice','Voice note from Dad');toast('Voice note from Dad',text,'info');dadMsg('Sent to Phil','Your message is on its way.');dirty()}],
+    ["He goes to the bathroom. Phil only sees a closed door and a timer.",async()=>{moveTo('bath','toilet')}],
+    ["25 minutes later he is still there, longer than usual, so Phil gets a quiet alert.",async()=>{for(let i=0;i<26;i++){S.t+=1;rules()}dirty()}],
+    ["He walks back to his chair.",async()=>{moveTo('sit','chair')}],
+    ["He holds Help. A 10-second countdown lets him cancel if it was a mistake.",async()=>{startHelpCountdown();await wait(10800)}],
+    ["Phil and Mom are called at the same time. Mom does not answer within 3 minutes…",async()=>{await wait(6600)}],
+    ["…so Jay is called next. He presses 1. Dad's phone says help is on the way.",async()=>{await wait(800);acceptLadder()}],
+    ["Jay arrives, opens the SMS link and taps He's OK. The day goes back to green.",async()=>{openResponder();await wait(3200);resolveLadder('ok')}],
+  ];
+  $('#demoBar').hidden=false;
+  for(let i=0;i<steps.length;i++){
+    if(!alive())return;$('#demoStep').textContent=`${i+1} of ${steps.length}`;$('#demoText').textContent=steps[i][0];
+    await steps[i][1]();if(!alive())return;await wait(4300);
+  }
+  $('#demoStep').textContent='Done';$('#demoText').textContent='Now try the buttons yourself: hold them on the phone, or use the simulator.';
+  await wait(6000);if(alive())$('#demoBar').hidden=true;
+}
+$('#demoBtn').onclick=playDemo;
+$('#demoStop').onclick=()=>{demoRun++;$('#demoBar').hidden=true;closeModal()};
 
 /* ---------- loop ---------- */
 buildMap();render();renderLive();

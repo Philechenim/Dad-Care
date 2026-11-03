@@ -26,6 +26,8 @@ export function speak(text: string) {
 
 export function vibrate(pattern: number | number[]) {
   try {
+    // Browsers refuse vibration until the screen has been touched once; skip quietly until then.
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
     navigator.vibrate?.(pattern);
   } catch {}
 }

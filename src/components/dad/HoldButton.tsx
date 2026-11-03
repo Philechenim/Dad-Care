@@ -7,12 +7,13 @@ import { allowPress, vibrate } from "@/lib/dad/device";
 
 export type Tone = "ok" | "talk" | "med" | "help" | "plain";
 
+// --tint colours the glass, the disc and the progress ring; the text class is the deep ink of the same hue.
 const TONES: Record<Tone, string> = {
-  ok: "bg-dad-ok-bg text-dad-ok-ink",
-  talk: "bg-dad-talk-bg text-dad-talk-ink",
-  med: "bg-dad-med-bg text-dad-med-ink",
-  help: "bg-dad-help-bg text-dad-help-ink",
-  plain: "bg-dad-plain-bg text-dad-ink",
+  ok: "[--tint:var(--dad-ok)] text-dad-ok-ink",
+  talk: "[--tint:var(--dad-talk)] text-dad-talk-ink",
+  med: "[--tint:var(--dad-med)] text-dad-med-ink",
+  help: "[--tint:var(--dad-help)] text-dad-help-ink",
+  plain: "[--tint:var(--dad-plain)] text-dad-ink",
 };
 
 type Props = {
@@ -106,7 +107,7 @@ export function HoldButton({
       ref={ref}
       type="button"
       aria-label={`${label}. Press and hold.`}
-      className={`dc-hold ${TONES[tone]} ${shape} flex items-center ${className}`}
+      className={`dc-hold dc-glass ${TONES[tone]} ${shape} flex items-center ${className}`}
       onPointerDown={(e) => {
         try {
           e.currentTarget.setPointerCapture(e.pointerId); // keep the hold if the finger drifts off the button

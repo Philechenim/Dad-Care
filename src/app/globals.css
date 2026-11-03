@@ -9,8 +9,8 @@
   --ink: #15201d;
   --muted: #5a6763;
   --line: #d5dcd9;
-  --accent: #2b3fa0;
-  --accent-soft: #e2e6f6;
+  --accent: #1d6b66;
+  --accent-soft: #dcecea;
   --on-accent: #ffffff;
   --ok: #1d7f52;
   --ok-soft: #ddf1e6;
@@ -19,21 +19,19 @@
   --crit: #c2342a;
   --crit-soft: #faddda;
 
-  /* Dad's screen: soft pale fields, each with deep ink of its own hue (all text 7:1 or better).
-     Fixed light in every theme. No indigo, no gradients, no shadows at rest. */
-  --dad-ground: #f2f2ee;
-  --dad-raised: #ffffff;
+  /* Dad's screen: frosted glass tiles over the sky above Jos, which follows the time of day.
+     Each tile has a solid disc in its own hue; labels are deep ink of that hue on frosted white. */
   --dad-ink: #171816;
-  --dad-muted: #4b4f49;
-  --dad-ok-bg: #d8e9db;
-  --dad-ok-ink: #1d4a2f;
-  --dad-talk-bg: #d4e5ea;
-  --dad-talk-ink: #17414d;
-  --dad-med-bg: #f0e1c8;
-  --dad-med-ink: #5c380c;
-  --dad-help-bg: #f3d5cf;
-  --dad-help-ink: #7a2016;
-  --dad-plain-bg: #e3e3de;
+  --dad-muted: #3f443f;
+  --dad-ok: #2e7d57;
+  --dad-ok-ink: #17402a;
+  --dad-talk: #2a6f86;
+  --dad-talk-ink: #143c49;
+  --dad-med: #b06a1a;
+  --dad-med-ink: #563308;
+  --dad-help: #c4473b;
+  --dad-help-ink: #6f1c13;
+  --dad-plain: #5d6560;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,8 +42,8 @@
     --ink: #e6edea;
     --muted: #95a39e;
     --line: #2a3531;
-    --accent: #93a4ff;
-    --accent-soft: #232b52;
+    --accent: #7cc9c0;
+    --accent-soft: #17302d;
     --on-accent: #0e1412;
     --ok: #3fc98a;
     --ok-soft: #173327;
@@ -73,19 +71,17 @@
   --color-warn-soft: var(--warn-soft);
   --color-crit: var(--crit);
   --color-crit-soft: var(--crit-soft);
-  --color-dad-ground: var(--dad-ground);
-  --color-dad-raised: var(--dad-raised);
   --color-dad-ink: var(--dad-ink);
   --color-dad-muted: var(--dad-muted);
-  --color-dad-ok-bg: var(--dad-ok-bg);
+  --color-dad-ok: var(--dad-ok);
   --color-dad-ok-ink: var(--dad-ok-ink);
-  --color-dad-talk-bg: var(--dad-talk-bg);
+  --color-dad-talk: var(--dad-talk);
   --color-dad-talk-ink: var(--dad-talk-ink);
-  --color-dad-med-bg: var(--dad-med-bg);
+  --color-dad-med: var(--dad-med);
   --color-dad-med-ink: var(--dad-med-ink);
-  --color-dad-help-bg: var(--dad-help-bg);
+  --color-dad-help: var(--dad-help);
   --color-dad-help-ink: var(--dad-help-ink);
-  --color-dad-plain-bg: var(--dad-plain-bg);
+  --color-dad-plain: var(--dad-plain);
 
   --font-sans: var(--font-atkinson);
   --font-display: var(--font-bricolage);
@@ -97,57 +93,166 @@ body {
   color: var(--ink);
 }
 
-/* Dad Care hold-to-press buttons (see src/components/dad/HoldButton.tsx). */
+/* ---------- Dad's screen (src/components/dad) ---------- */
+
+/* The sky over Jos, by time of day. Sets the ground, the sun or moon glow, the hills and the header ink. */
+.dc-sky {
+  --sky-top: #8ec5e8;
+  --sky-mid: #cfe7f2;
+  --sky-low: #eef4ee;
+  --glow: #fff6d8;
+  --glow-at: 82% 6%;
+  --hill-far: #a9c3a2;
+  --hill-near: #8aae87;
+  --head-ink: #171816;
+  --head-muted: #2f3a35;
+  --glass-alpha: 0.56;
+  background:
+    radial-gradient(circle at var(--glow-at), var(--glow) 0, transparent 34%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-low) 100%);
+  transition: background 2s ease;
+}
+.dc-sky[data-period="morning"] {
+  --sky-top: #f4c497;
+  --sky-mid: #f6e2c8;
+  --sky-low: #d5e6ec;
+  --glow: #ffe2ad;
+  --glow-at: 16% 10%;
+  --hill-far: #bccab4;
+  --hill-near: #9cb29b;
+}
+.dc-sky[data-period="evening"] {
+  --sky-top: #e29c86;
+  --sky-mid: #f0c6b1;
+  --sky-low: #e8dad4;
+  --glow: #ffcf9f;
+  --glow-at: 80% 26%;
+  --hill-far: #a88581;
+  --hill-near: #8a6a67;
+  --head-ink: #22160f;
+  --head-muted: #3b2a22;
+}
+.dc-sky[data-period="night"] {
+  --sky-top: #1b2944;
+  --sky-mid: #2f4368;
+  --sky-low: #4a5d80;
+  --glow: #c3cfe8;
+  --glow-at: 72% 32%; /* moon sits behind the tiles so the white header text stays readable */
+  --hill-far: #2b3a56;
+  --hill-near: #1f2b42;
+  --head-ink: #ffffff;
+  --head-muted: #dbe2ef;
+  --glass-alpha: 0.72;
+}
+.dc-hills path:first-child {
+  fill: var(--hill-far);
+}
+.dc-hills path:last-child {
+  fill: var(--hill-near);
+}
+
+/* Frosted glass tile. --tint is the tile's own hue. */
+.dc-glass {
+  background: color-mix(in srgb, var(--tint, var(--dad-plain)) 14%, rgb(255 255 255 / var(--glass-alpha, 0.56)));
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(22px) saturate(1.6);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.65),
+    0 14px 32px -18px rgb(16 28 36 / 0.45);
+}
+.dc-glass.dc-solid {
+  background: color-mix(in srgb, var(--tint, var(--dad-plain)) 6%, rgb(255 255 255 / 0.86));
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .dc-glass {
+    background: color-mix(in srgb, var(--tint, var(--dad-plain)) 12%, #f7f7f4);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dc-glass {
+    background: color-mix(in srgb, var(--tint, var(--dad-plain)) 12%, #f7f7f4);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Hold-to-press button (HoldButton.tsx). */
 .dc-hold {
   --p: 0;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   user-select: none;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition: transform 0.18s ease, background-color 0.18s ease;
 }
 .dc-hold[data-holding] {
-  transform: scale(0.98);
-  filter: brightness(0.96);
+  transform: scale(0.97);
+  background: color-mix(in srgb, var(--tint) 24%, rgb(255 255 255 / 0.7));
 }
 
-/* The filling ring that shows how long to keep holding. */
+/* Solid disc with a white icon, and the ring around it that fills while Dad holds. */
 .dc-ring {
   position: relative;
   display: grid;
   place-items: center;
   flex: none;
-  width: 84px;
-  height: 84px;
+  width: 92px;
+  height: 92px;
+  color: #fff;
 }
 .dc-ring::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(currentColor calc(var(--p) * 360deg), color-mix(in srgb, currentColor 16%, transparent) 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  background: conic-gradient(var(--tint) calc(var(--p) * 360deg), color-mix(in srgb, var(--tint) 22%, transparent) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+}
+.dc-ring::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border-radius: 50%;
+  background: var(--tint);
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--tint) 80%, transparent);
 }
 .dc-ring svg {
-  width: 40px;
-  height: 40px;
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
 }
 .dc-row .dc-ring {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
+}
+.dc-row .dc-ring::after {
+  inset: 8px;
 }
 .dc-row .dc-ring svg {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 .dc-row .dc-ring::before {
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+}
+
+/* A solid disc on its own (confirmation and call screens). */
+.dc-disc {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tint);
+  color: #fff;
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--tint) 85%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dc-hold {
+  .dc-hold,
+  .dc-sky {
     transition: none;
   }
 }

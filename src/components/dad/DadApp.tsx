@@ -48,6 +48,11 @@ const slotTime = (hhmm: string) => {
 };
 const greeting = (d: Date) => (d.getHours() < 12 ? "Good morning" : d.getHours() < 17 ? "Good afternoon" : "Good evening");
 const nextSlot = (day: DoseDay) => DOSES.find((s) => !day[s.id]?.taken);
+// The sky behind Dad's buttons follows the day, so he can tell morning from evening at a glance.
+const periodOf = (d: Date) => {
+  const h = d.getHours();
+  return h < 5 ? "night" : h < 11 ? "morning" : h < 17 ? "afternoon" : h < 20 ? "evening" : "night";
+};
 
 export function DadApp() {
   const [view, setView] = useState<View>("home");
@@ -322,17 +327,22 @@ export function DadApp() {
 
   return (
     <main
-      className="relative flex h-dvh flex-col gap-3 overflow-hidden bg-dad-ground px-4 pb-4 text-dad-ink select-none"
+      data-period={now ? periodOf(now) : "afternoon"}
+      className="dc-sky relative isolate flex h-dvh flex-col gap-3 overflow-hidden px-4 pb-4 text-(--head-ink) select-none"
       style={{ paddingTop: "max(16px, env(safe-area-inset-top))", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
     >
+      <svg className="dc-hills pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42%] w-full" viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 118C38 96 70 70 108 80c30 8 42-22 78-24 32-2 46 30 80 32 34 2 54-24 90-20 24 3 36 14 44 18v114H0Z" />
+        <path d="M0 158c48-20 80-32 128-20 40 10 72-20 118-16 40 4 54 26 94 22 30-3 46-14 60-11v67H0Z" />
+      </svg>
       {view === "home" && (
         <>
           <header className="flex items-end justify-between px-1">
             <div>
-              <p className="text-xl font-bold text-dad-muted">{now ? greeting(now) : " "}</p>
+              <p className="text-xl font-bold text-(--head-muted)">{now ? greeting(now) : " "}</p>
               <p className="text-[44px] leading-none font-bold tabular-nums">{now ? clock(now) : " "}</p>
             </div>
-            <p className="text-right text-lg leading-snug font-bold text-dad-muted">
+            <p className="text-right text-lg leading-snug font-bold text-(--head-muted)">
               {now?.toLocaleDateString("en-GB", { weekday: "long" })}
               <br />
               {now?.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
@@ -374,13 +384,13 @@ export function DadApp() {
         <>
           <div className="px-1 pt-2">
             <h1 className="text-[32px] leading-tight font-bold">Talk to family</h1>
-            <p className="mt-1 text-xl text-dad-muted">Hold the circle and speak. Let go to send.</p>
+            <p className="mt-1 text-xl text-(--head-muted)">Hold the circle and speak. Let go to send.</p>
           </div>
           <div className="flex min-h-0 flex-1 items-center justify-center">
             <button
               type="button"
               aria-label="Hold to record a voice message"
-              className={`flex size-60 flex-col items-center justify-center gap-3 rounded-full bg-dad-talk-bg text-dad-talk-ink transition-transform select-none [touch-action:none] ${recording ? "scale-105" : ""}`}
+              className={`flex size-60 flex-col items-center justify-center gap-3 rounded-full dc-glass [--tint:var(--dad-talk)] text-dad-talk-ink transition-transform select-none [touch-action:none] ${recording ? "scale-105" : ""}`}
               onPointerDown={(e) => {
                 e.currentTarget.setPointerCapture(e.pointerId);
                 void startRecording();
@@ -389,7 +399,7 @@ export function DadApp() {
               onPointerCancel={stopRecording}
               onContextMenu={(e) => e.preventDefault()}
             >
-              <span className="size-14">
+              <span className="dc-disc size-24 p-6 [--tint:var(--dad-talk)]">
                 <IconMic />
               </span>
               <span className="text-2xl font-bold">{recording ? "Listening…" : "Hold to talk"}</span>
@@ -401,7 +411,7 @@ export function DadApp() {
 
       {view === "med" && (
         <>
-          <section className="flex min-h-0 flex-1 flex-col gap-4 rounded-[28px] bg-dad-raised p-5">
+          <section className="flex min-h-0 flex-1 flex-col gap-4 rounded-[28px] p-5 dc-glass dc-solid text-dad-ink [--head-ink:var(--dad-ink)] [--head-muted:var(--dad-muted)]">
             {slot ? (
               <>
                 <div>
@@ -420,17 +430,17 @@ export function DadApp() {
                       />
                       <span className="text-xl leading-tight font-bold">
                         {p.name}
-                        <span className="block text-base font-normal text-dad-muted">{p.note}</span>
+                        <span className="block text-base font-normal text-(--head-muted)">{p.note}</span>
                       </span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-auto text-sm text-dad-muted">Example schedule. Phil sets the real medicines and photos.</p>
+                <p className="mt-auto text-sm text-(--head-muted)">Example schedule. Phil sets the real medicines and photos.</p>
               </>
             ) : (
               <div className="my-auto">
                 <p className="text-[32px] leading-tight font-bold">All done for today</p>
-                <p className="mt-1 text-xl text-dad-muted">You have taken all your medicine.</p>
+                <p className="mt-1 text-xl text-(--head-muted)">You have taken all your medicine.</p>
               </div>
             )}
           </section>
@@ -442,11 +452,11 @@ export function DadApp() {
       {view === "help" && (
         <>
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-            <p className="text-2xl font-bold text-dad-muted">Calling for help in</p>
+            <p className="text-2xl font-bold text-(--head-muted)">Calling for help in</p>
             <p className="text-[150px] leading-none font-bold text-dad-help-ink tabular-nums" aria-live="assertive">
               {helpLeft}
             </p>
-            <p className="text-xl text-dad-muted">Hold Cancel if you are fine</p>
+            <p className="text-xl text-(--head-muted)">Hold Cancel if you are fine</p>
           </div>
           <HoldButton label="Cancel" tone="plain" layout="row" holdMs={600} icon={<IconClose />} onTooShort={tooShort} onBlocked={blocked} onHold={() => { record("help", { cancelled: true }); say("Cancelled. No one was called."); showMsg("Cancelled", "No one was called."); }} className="h-[100px] shrink-0" />
         </>
@@ -455,13 +465,13 @@ export function DadApp() {
       {view === "helpon" && (
         <>
           <div className="flex min-h-0 flex-1 flex-col justify-center gap-4 px-2">
-            <span className="grid size-24 place-items-center rounded-full bg-dad-help-bg text-dad-help-ink">
+            <span className="dc-disc size-24 [--tint:var(--dad-help)]">
               <span className="size-11">
                 <IconPhone />
               </span>
             </span>
             <h1 className="text-[34px] leading-tight font-bold text-balance">{helpOn.title}</h1>
-            <p className="text-xl text-dad-muted">{helpOn.sub}</p>
+            <p className="text-xl text-(--head-muted)">{helpOn.sub}</p>
           </div>
           <HoldButton label="I'm fine now" tone="ok" layout="row" icon={<IconCheck />} onTooShort={tooShort} onBlocked={blocked} onHold={() => { record("help", { resolved_by_dad: true }); go("home"); }} className="h-[88px] shrink-0" />
         </>
@@ -470,10 +480,10 @@ export function DadApp() {
       {view === "walk" && (
         <>
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
-            <div className={`grid size-56 place-items-center rounded-full text-5xl font-bold transition-transform duration-75 ${beatLeft ? "scale-100 bg-dad-plain-bg" : "scale-105 bg-dad-ok-bg text-dad-ok-ink"}`}>
+            <div className={`grid size-56 place-items-center rounded-full text-5xl font-bold transition-transform duration-75 dc-glass text-dad-ink ${beatLeft ? "scale-100 [--tint:var(--dad-plain)]" : "scale-105 [--tint:var(--dad-ok)] text-dad-ok-ink"}`}>
               {beatLeft ? "Left" : "Right"}
             </div>
-            <p className="text-xl text-dad-muted tabular-nums">{WALK_BPM} steps a minute</p>
+            <p className="text-xl text-(--head-muted) tabular-nums">{WALK_BPM} steps a minute</p>
           </div>
           <HoldButton label="Stop" tone="plain" layout="row" holdMs={600} icon={<IconClose />} onTooShort={tooShort} onBlocked={blocked} onHold={() => go("home")} className="h-[96px] shrink-0" />
         </>
@@ -481,25 +491,25 @@ export function DadApp() {
 
       {view === "msg" && (
         <div className="flex min-h-0 flex-1 flex-col justify-center gap-4 px-2">
-          <span className="grid size-24 place-items-center rounded-full bg-dad-ok-bg text-dad-ok-ink">
+          <span className="dc-disc size-24 [--tint:var(--dad-ok)]">
             <span className="size-11">
               <IconCheck />
             </span>
           </span>
           <h1 className="text-[34px] leading-tight font-bold">{msg.title}</h1>
-          <p className="text-xl text-dad-muted">{msg.sub}</p>
+          <p className="text-xl text-(--head-muted)">{msg.sub}</p>
         </div>
       )}
 
       <p
         role="status"
-        className={`pointer-events-none absolute top-6 left-1/2 -translate-x-1/2 rounded-full bg-dad-ink px-5 py-2.5 text-lg font-bold whitespace-nowrap text-dad-ground transition-opacity ${hint ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none absolute top-6 left-1/2 -translate-x-1/2 rounded-full bg-dad-ink px-5 py-2.5 text-lg font-bold whitespace-nowrap text-white transition-opacity ${hint ? "opacity-100" : "opacity-0"}`}
       >
         {hint}
       </p>
       <p
         aria-live="polite"
-        className={`pointer-events-none absolute inset-x-4 bottom-4 flex items-start gap-3 rounded-2xl bg-dad-ink px-4 py-3 text-lg text-dad-ground shadow-lg transition-opacity ${caption ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none absolute inset-x-4 bottom-4 flex items-start gap-3 rounded-2xl bg-dad-ink px-4 py-3 text-lg text-white shadow-lg transition-opacity ${caption ? "opacity-100" : "opacity-0"}`}
       >
         <span className="mt-1 shrink-0">
           <IconSpeaker />
